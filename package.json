@@ -1,0 +1,28 @@
+{
+    "private": true,
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@rollup/plugin-node-resolve": "^16.0.2",
+        "@rollup/plugin-replace": "^6.0.3",
+        "@rollup/plugin-terser": "^0.4.4",
+        "c8": "^10.1.3",
+        "eslint": "^9.39.1",
+        "eslint-plugin-regexp": "^2.10.0",
+        "html-minifier-next": "^4.17.0",
+        "html-minifier-terser": "^7.2.0",
+        "prettier": "^3.6.2",
+        "rollup": "^4.52.0",
+        "terser": "^5.44.0"
+    },
+    "scripts": {
+        "_test": "c8 --all --include '**/src/**/*.js' --exclude '**/index.js' --exclude '**/aaa.js' node --test",
+        "test_r": "c8 --all --reporter=html --include 'packages/*/src/**/*.js' --exclude '**/index.js' node --test",
+        "test": "c8 --all --include 'packages/*/src/**/*.js' --exclude '**/index.js' node --test"
+    },
+    "author": "m-nakasato",
+    "license": "MIT",
+    "description": "",
+    "workspaces": [
+        "packages/*"
+    ]
+}

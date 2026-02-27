@@ -1,0 +1,15 @@
+{
+    "name": "@m-nakasato/kobo-audio",
+    "version": "0.0.0",
+    "type": "module",
+    "main": "./src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "m-nakasato",
+    "license": "MIT",
+    "description": "",
+    "exports": {
+        ".": "./src/index.js"
+    }
+}
