@@ -3,10 +3,6 @@
     "workspaces": [
         "packages/*"
     ],
-    "scripts": {
-        "test_r": "c8 --all --reporter=html --include 'packages/*/src/**/*.js' --exclude '**/index.js' node --test",
-        "test": "c8 --all --include 'packages/*/src/**/*.js' --exclude '**/index.js' node --test"
-    },
     "devDependencies": {
         "@eslint/js": "^9.39.1",
         "@rollup/plugin-node-resolve": "^16.0.2",

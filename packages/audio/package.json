@@ -1,6 +1,7 @@
 {
     "name": "@m-nakasato/kobo-audio",
     "version": "0.0.0",
+    "type": "module",
     "description": "KOBO Framework audio module for JavaScript mini-games.",
     "author": "m-nakasato",
     "license": "MIT",
@@ -8,7 +9,7 @@
         ".": "./src/index.mjs"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "serve": "npx serve examples -p 3000"
+        "test_r": "c8 --all --reporter=html --include 'src/**/*.mjs' --exclude '**/index.mjs' node --test",
+        "test": "c8 --all --include 'src/**/*.mjs' --exclude '**/index.mjs' node --test"
     }
 }

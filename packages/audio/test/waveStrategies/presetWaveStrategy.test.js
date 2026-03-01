@@ -1,11 +1,11 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { presetWaveStrategy } from '../../src/waveStrategies/presetWaveStrategy.js';
+import { presetWaveStrategy } from '../../src/waveStrategies/presetWaveStrategy.mjs';
 
 global.__DEV__ = true;
 
 // Stub: Frequency of 'A5' (Self-made utility func)
-import * as spn from '../../src/utils/spn2freq.js';
+import * as spn from '../../src/utils/spn2freq.mjs';
 mock.fn(spn, 'spn2freq', () => 880);
 
 // Mock: OscillatorNode for testing (Web Audio API is not available in Node.js)
