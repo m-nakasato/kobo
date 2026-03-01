@@ -8,7 +8,6 @@ export class Wave {
         this.#source = strategy.generateSource(material, audioCtx, helper);
     }
     getSourceNode(pitch) {
-        // console.log(this.#source);
         return this.#strategy.createSourceNode(this.#audioCtx, this.#source, pitch);
     }
 }

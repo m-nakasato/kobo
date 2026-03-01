@@ -1,15 +1,14 @@
 {
     "name": "@m-nakasato/kobo-audio",
     "version": "0.0.0",
-    "type": "module",
-    "main": "./src/index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
+    "description": "KOBO Framework audio module for JavaScript mini-games.",
     "author": "m-nakasato",
     "license": "MIT",
-    "description": "",
     "exports": {
-        ".": "./src/index.js"
+        ".": "./src/index.mjs"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "serve": "npx serve examples -p 3000"
     }
 }

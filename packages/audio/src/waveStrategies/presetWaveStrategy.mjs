@@ -1,4 +1,4 @@
-import { spn2freq } from '../utils/spn2freq.js';
+import { spn2freq } from '../utils/spn2freq.mjs';
 
 export const presetWaveStrategy = {
     generateSource: type => type,

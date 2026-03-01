@@ -1,5 +1,5 @@
-import { spn2freq } from '../utils/spn2freq.js';
-import { dft } from '../utils/dft.js';
+import { spn2freq } from '../utils/spn2freq.mjs';
+import { dft } from '../utils/dft.mjs';
 
 export const tableWaveStrategy = {
     generateSource: (table, audioCtx) => {
