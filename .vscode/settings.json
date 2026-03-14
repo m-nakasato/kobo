@@ -1,4 +1,4 @@
 {
-    "cSpell.words": ["adsr", "jsgamelib", "lfsr"],
+    "cSpell.words": ["adsr", "lfsr", "Wavetable", "KMSL"],
     "prettier.logLevel": "debug"
 }
