@@ -6,10 +6,11 @@
     "author": "m-nakasato",
     "license": "MIT",
     "exports": {
-        ".": "./src/index.mjs"
+        ".": "./index.mjs"
     },
     "scripts": {
-        "test_r": "c8 --all --reporter=html --include 'src/**/*.mjs' --exclude '**/index.mjs' node --test",
-        "test": "c8 --all --include 'src/**/*.mjs' --exclude '**/index.mjs' node --test"
+        "lint": "eslint .",
+        "test": "npm run lint && c8 --all --include '*/src/**/*.mjs' --exclude '**/index.mjs' node --test",
+        "test_r": "npm run lint && c8 --all --reporter=html --include '*/src/**/*.mjs' --exclude '**/index.mjs' node --test"
     }
 }

@@ -1,5 +1,5 @@
 import js from '@eslint/js';
-import * as regexpPlugin from 'eslint-plugin-regexp';
+import importPlugin from 'eslint-plugin-import';
 import globals from 'globals';
 
 export default [
@@ -7,10 +7,18 @@ export default [
         ignores: ['**/dist/**'],
     },
     js.configs.recommended,
-    regexpPlugin.configs[('flat/recommended', '**/test/**/*.test.js')],
     {
-        files: ['**/src/**/*.js'],
+        files: ['**/src/**/*.{js,mjs}', '**/test/**/*.test.js'],
+        ...importPlugin.flatConfigs.recommended,
+        rules: {
+            'import/no-unresolved': 'error',
+        },
+    },
+    {
+        files: ['**/src/**/*.{js,mjs}'],
         languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
             globals: {
                 ...globals.browser,
                 __DEV__: 'readonly',
@@ -41,6 +49,8 @@ export default [
     {
         files: ['**/*.config.js', '**/test/**/*.test.js'],
         languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
             globals: {
                 ...globals.node,
             },

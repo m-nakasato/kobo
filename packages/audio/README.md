@@ -7,7 +7,7 @@ The synthesizer module generates and plays waveforms (Wraps the Web Audio API), 
 
 ## Features
 
-- Synthesizer
+- [Synthesizer](./synthesizer/)
     - Waveforms
         - Preset
             - Sine
