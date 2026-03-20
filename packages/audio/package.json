@@ -7,10 +7,5 @@
     "license": "MIT",
     "exports": {
         ".": "./index.mjs"
-    },
-    "scripts": {
-        "lint": "eslint .",
-        "test": "npm run lint && c8 --all --include '*/src/**/*.mjs' --exclude '**/index.mjs' node --test",
-        "test_r": "npm run lint && c8 --all --reporter=html --include '*/src/**/*.mjs' --exclude '**/index.mjs' node --test"
     }
 }
