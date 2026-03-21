@@ -17,5 +17,10 @@
         "prettier": "^3.6.2",
         "rollup": "^4.52.0",
         "terser": "^5.44.0"
+    },
+    "scripts": {
+        "test": "eslint . && node --test",
+        "test_c": "eslint . && c8 --all --include 'packages/**/src/**/*.mjs' --exclude '**/index.mjs' node --test",
+        "test_r": "eslint . && c8 --all --reporter=html --include 'packages/**/src/**/*.mjs' --exclude '**/index.mjs' node --test"
     }
 }
