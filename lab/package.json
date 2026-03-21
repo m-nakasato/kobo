@@ -5,13 +5,10 @@
     "scripts": {
         "_clean": "rm -rf ./dist && mkdir ./dist",
         "_rollup": "rollup -c ../rollup.config.js",
-        "_html-minifier": "html-minifier-next ./src/index.html -o ./dist/index.html -c ../html-minifier.config.js",
+        "_html-minifier": "html-minifier-terser ./src/index.html -o ./dist/index.html -c ../html-minifier.config.js",
         "_build": "npm run _clean && npm run _rollup && npm run _html-minifier",
         "_zip": "zip -j ./dist/b.zip ./dist/b.js ./dist/index.html",
         "debug": "__DEV__=true npm run _build",
         "release": "__DEV__=false npm run _build && npm run _zip"
-    },
-    "author": "m-nakasato",
-    "license": "MIT",
-    "description": ""
+    }
 }
