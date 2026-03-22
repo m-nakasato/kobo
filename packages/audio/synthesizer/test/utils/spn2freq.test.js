@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 // import util from 'node:util';
-import { spn2freq } from '../../../src/synthesizer/utils/spn2freq.mjs';
+import { spn2freq } from '../../src/utils/spn2freq.mjs';
 
 global.__DEV__ = true;
 
