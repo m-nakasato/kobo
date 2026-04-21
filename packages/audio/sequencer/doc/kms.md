@@ -30,8 +30,8 @@ let kms = {
 - Required
 - Cannot be changed during playback
 
-```javascript
-bpm: 160;
+```
+bpm: 160
 ```
 
 ### Time
@@ -42,8 +42,8 @@ bpm: 160;
 - Default: '4/4'
 - Cannot be changed during playback
 
-```javascript
-time: '3/4';
+```
+time: '3/4'
 ```
 
 ### Loop
@@ -54,8 +54,8 @@ time: '3/4';
 - If omitted, playback does not loop
 - If specified, playback returns to the measure after the final measure
 
-```javascript
-loop: 3;
+```
+loop: 3
 ```
 
 ### Value
@@ -65,8 +65,8 @@ loop: 3;
 - Pattern: `/^(1|2|4|8|16|32)\.?t?$/`
 - Default: '8'
 
-```javascript
-value: '16';
+```
+value: '16'
 ```
 
 ### Track
@@ -111,18 +111,19 @@ value: '16';
 ##### Note
 
 - Parameters are separated by `,`
-- Pitch
-    - MIDI note Number
+
+1. Pitch
+    - MIDI note number
     - Integer
     - Range: 0 - 127
     - Required
-- Value
+2. Value
     - Note duration
     - String
     - Pattern: `/^(1|2|4|8|16|32)\.?t?$/`
     - Default: top-level `value`
     - Required if the option is set
-- Option
+3. Option
     - Timbre parameters (Synthesizer parameter set)
     - Specifies the key of the applicable track within `opt`
     - Optional
@@ -133,11 +134,56 @@ value: '16';
 
 ##### Rest
 
+- Parameters are separated by `,`
+
+1. `_`
+    - Fixed value
+    - String
+    - Required
+2. Value
+    - Note duration
+    - String
+    - Pattern: `/^(1|2|4|8|16|32)\.?t?$/`
+    - Default: top-level `value`
+    - Required if the option is set
+
+```javascript
+'_,4.'; // dotted quarter rest
+```
+
 ##### Repeat
 
-- Note repeat
-- Beat repeat
-- Measure repeat
+###### Note / Rest repeat
+
+- `+`
+- Repeats the preceding note or rest once
+
+```javascript
+'77,4t,tri +'; // 77,4t,tri 77,4t,tri
+'_,4. + +'; // _,4. _,4. _,4.
+```
+
+###### Beat repeat
+
+- `*`, `*2`, `*3`, `*4`, `*5`, `*6`, `*7`
+- Repeats the preceding beat
+- The number specifies how many time to repeat
+
+```javascript
+'...|79 78/*/77 75/*|...'; // 79 78/79 78/77 75/77 75
+'...|79 78/*3|...'; // 79 78/79 78/79 78/79 78
+```
+
+###### Measure repeat
+
+- `%`, `%2`, `%3`, `%4`, `%5`, `%6`, `%7`
+- Repeats the preceding measure
+- The number specifies how many time to repeat
+
+```javascript
+'...|60/62/64/_|%|...'; // |60/62/64/_|60/62/64/_|
+'...|60/62/64/_|%3|...'; // |60/62/64/_|60/62/64/_|60/62/64/_|60/62/64/_|
+```
 
 ### Seq
 
@@ -160,18 +206,16 @@ event      = note
            | beat_repeat
            | measure_repeat ;
 
-note       = pitch , [ "," , value , [ "," , option ] ] ;
+note       = pitch , [ "," , value , [ "," , digit ] ] ;
 rest       = "_" , [ "," , value ] ;
-beat_repeat    = "*" , [ power_of_2 ] ;
-measure_repeat = "%" , [ power_of_2 ] ;
+beat_repeat    = "*" , [ digit ] ;
+measure_repeat = "%" , [ digit ] ;
 
-pitch      = digit | digit , digit | "1" , digit , digit ;
+pitch      = digit
+　　　　　　 | digit , digit
+　　　　　　 | "1" , digit , digit ;
 
-value      = power_of_2 , [ dot ] , [ triplet ] ;
-dot        = "." ;
-triplet    = "t" ;
-
-option     = digit;
+value      = power_of_2 , [ "." ] , [ "t" ] ;
 
 power_of_2 = "1" | "2" | "4" | "8" | "16" | "32";
 
@@ -180,7 +224,7 @@ digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 ### RailRoad diagram
 
-<img src="https://img.plantuml.biz/plantuml/dsvg/RLBRJiCm37tFLqIMU85gi8whfadx3uIgRlL6nTPKgJSU6F-ExIIz0AranoV7FiTLrnsLdd3Jx0pvSljXzLdP8vRToQFDx9U52t1EoBTT6fCAvMwmf42y5QAMoj9JceXdR2BD2YtKoWl7o6iSeR73Sx4UEveYS0DJG9GAZosdwKKq6kz4JERtfjgQjkzivjL29gREvU64ezgrLBl6ll6xDEAZxuG2_lG9QUGa4gy3iNMVw0ktAtBb_JB6lAj_UIPOZAfLlQ-9rmevwskOGr-bpBt1Ljfr62mwbICMa1FvkZqWgPoWmuupO2XT1uW4Cl6xZ4o9qq5WfOxOLwxnNkEpnlcZfaKEt1AS9haxYAlqZOjH-uF6qFqq6lWYZjROLFeN_m00"/>
+<img src="https://img.plantuml.biz/plantuml/dsvg/VPBRJiCm38RlynIM9MwW0jPnL3Lfxu5GbMqUL40xfTcuO4XxLru4nqvwGgAjxDZvRF-9kcozTPvMzTPuPzTl8Cy2FiYsUqUGmHVW4Tcdp3SKngH0s1LPh-1L02KKIbQf8nseZXW4J6FXT1cvkl5ae7-EuAZrumnUu3WH9fMETkp66r5et0l3GlzErAxowrSMymIO1L47-xwdGRofNYeFp_mM9iZe2h74FsK16WY9uBc2gLDX9f8OEPiYHdN5MP8tFwVJvEFZQKds7uAp_Y39ymILdAwX-IHNDjiorqDT8ikGbSSeg2SMqf8Rvs9ln3w8dTs9c-V89JegtTSrHYrTuNnGVYjMg-y73H-HXo-ftiWV-Wi0"/>
 
 ## Examples
 
