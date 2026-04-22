@@ -165,24 +165,26 @@ value: '16'
 
 ###### Beat repeat
 
-- `*`, `*2`, `*3`, `*4`, `*5`, `*6`, `*7`
-- Repeats the preceding beat
-- The number specifies how many time to repeat
+- `*`, `*2`, `*4`, `*8`
+- Repeats the preceding N beat(s) as a block
+- Default N is 1
+- Copies the last N beat(s) and append it once
 
 ```javascript
 '...|79 78/*/77 75/*|...'; // 79 78/79 78/77 75/77 75
-'...|79 78/*3|...'; // 79 78/79 78/79 78/79 78
+'...|79 78/77 75/*2|...'; // 79 78/77 75/79 78/77 75
 ```
 
 ###### Measure repeat
 
-- `%`, `%2`, `%3`, `%4`, `%5`, `%6`, `%7`
-- Repeats the preceding measure
-- The number specifies how many time to repeat
+- `%`, `%2`, `%4`, `%8`
+- Repeats the preceding N measure(s) as a block
+- Default N is 1
+- Copies the last N measure(s) and append it once
 
 ```javascript
 '...|60/62/64/_|%|...'; // |60/62/64/_|60/62/64/_|
-'...|60/62/64/_|%3|...'; // |60/62/64/_|60/62/64/_|60/62/64/_|60/62/64/_|
+'...|60/62/64/_|64/65/67/_|%2|...'; // |60/62/64/_|64/65/67/_|60/62/64/_|64/65/67/_|
 ```
 
 ### Seq
@@ -208,8 +210,8 @@ event      = note
 
 note       = pitch , [ "," , value , [ "," , digit ] ] ;
 rest       = "_" , [ "," , value ] ;
-beat_repeat    = "*" , [ digit ] ;
-measure_repeat = "%" , [ digit ] ;
+beat_repeat    = "*" , [ power_of_2 ] ;
+measure_repeat = "%" , [ power_of_2 ] ;
 
 pitch      = digit
 　　　　　　 | digit , digit
@@ -224,7 +226,7 @@ digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 ### RailRoad diagram
 
-<img src="https://img.plantuml.biz/plantuml/dsvg/VPBRJiCm38RlynIM9MwW0jPnL3Lfxu5GbMqUL40xfTcuO4XxLru4nqvwGgAjxDZvRF-9kcozTPvMzTPuPzTl8Cy2FiYsUqUGmHVW4Tcdp3SKngH0s1LPh-1L02KKIbQf8nseZXW4J6FXT1cvkl5ae7-EuAZrumnUu3WH9fMETkp66r5et0l3GlzErAxowrSMymIO1L47-xwdGRofNYeFp_mM9iZe2h74FsK16WY9uBc2gLDX9f8OEPiYHdN5MP8tFwVJvEFZQKds7uAp_Y39ymILdAwX-IHNDjiorqDT8ikGbSSeg2SMqf8Rvs9ln3w8dTs9c-V89JegtTSrHYrTuNnGVYjMg-y73H-HXo-ftiWV-Wi0"/>
+<img src="https://img.plantuml.biz/plantuml/dsvg/VPBRJiCm38RlynIM9MwW0jPnr3Hfxu5GbMtUg82sIhDnmP3shhm8ZftqC11fPSV9P_jFb4NhhVEqh3R6Exjw1HbpU2VRxXn11f-01sIVLhvWPamAX5sIzGfU1L12eMIMAjAUgeX1m3GMJgUHgsfF1lfn04Uj7w_W1OuNGgV2KSDkl165nhtGBDJlH3MbNxsmc2V0B8ZQsxST3U9rkIqzFFCtCq56buW5_aeBq4181CyLREeFSaMzANBXJdGnT_OdPrHXx2fopFVnUFBpGLLfzX-2a_v8oNC75Pykf6ylnxj4bY4pZr5GJyob91VEnTw8VH0xkHCtpP5Jj5MwkMkCMhh4wI3zLgnctmyAFY8tNr2rbhVw0m00"/>
 
 ## Examples
 
