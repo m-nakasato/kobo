@@ -11,7 +11,7 @@ KMS is represented as a JavaScript object with the following top-level fields:
 ```javascript
 let kms = {
     bpm: Integer,
-    time: String, //Optional
+    time: String,  //Optional
     loop: Integer, //Optional
     value: String, //Optional
     track: [String],
@@ -30,7 +30,7 @@ let kms = {
 - Required
 - Cannot be changed during playback
 
-```
+```javascript
 bpm: 160
 ```
 
@@ -42,19 +42,19 @@ bpm: 160
 - Default: '4/4'
 - Cannot be changed during playback
 
-```
+```javascript
 time: '3/4'
 ```
 
 ### Loop
 
-- Loop start measure number
+- Loop start `seq` index
 - Integer
 - Optional
 - If omitted, playback does not loop
-- If specified, playback returns to the measure after the final measure
+- If specified, after the final measure sequence, playback jumps back to the specified `seq` index.
 
-```
+```javascript
 loop: 3
 ```
 
@@ -65,14 +65,16 @@ loop: 3
 - Pattern: `/^(1|2|4|8|16|32)\.?t?$/`
 - Default: '8'
 
-```
+```javascript
 value: '16'
 ```
 
 ### Track
 
-- Array of long and continuous track strings
-- Each track string consists of one or more measures
+- Main part of the musical notation
+- String array
+- Required
+- All tracks must have the same number of measures
 
 #### Measure
 
@@ -85,7 +87,7 @@ value: '16'
 // Time: 2/2
 //   ┌── measure 0 ───┐ ┌─── measure 1 ───┐ ┌────────── measure 2 ───────────┐ ┌─── measure 3 ───┐
 //   ┌ beat ─┐ ┌ beat ┐ ┌ beat ─┐ ┌ beat ─┐ ┌─────── beat ────────┐ ┌─ beat ─┐ ┌ beat ─┐ ┌ beat ─┐
-'...|72 _,4 67/_,4 64 _|_ 69 _ 71/_ 70 69 _|67,4t,1 76,4t,1 79,4t,1/81 _ 77 79|_ 76 _ 72/74 71 _,4|...';
+'...|72 _,4 67/_,4 64 _|_ 69 _ 71/_ 70 69 _|67,4t,1 76,4t,1 79,4t,1/81 _ 77 79|_ 76 _ 72/74 71 _,4|...'
 ```
 
 #### Beat
@@ -100,7 +102,7 @@ value: '16'
 // Time: 2/2
 //   ┌──────────────── measure ──────────────┐
 //   ┌──── beat ─────┐ ┌─────── beat ────────┐
-'...|67,4t,1 77,4t,1 +/77,4t,1 76,4t,1 74,4t,1|...';
+'...|67,4t,1 77,4t,1 +/77,4t,1 76,4t,1 74,4t,1|...'
 ```
 
 #### Event
@@ -129,7 +131,7 @@ value: '16'
     - Default: 0
 
 ```javascript
-'77,4t,1'; // F4 (698.5Hz), quarter note triplet, opt=1
+'77,4t,1' // F4 (698.5Hz), quarter note triplet, opt=1
 ```
 
 ##### Rest
@@ -148,7 +150,7 @@ value: '16'
     - Required if the option is set
 
 ```javascript
-'_,4.'; // dotted quarter rest
+'_,4.' // dotted quarter rest
 ```
 
 ##### Repeat
@@ -159,8 +161,8 @@ value: '16'
 - Repeats the preceding note or rest once
 
 ```javascript
-'77,4t,1 +'; // 77,4t,1 77,4t,1
-'_,4. + +'; // _,4. _,4. _,4.
+'77,4t,1 +' // 77,4t,1 77,4t,1
+'_,4. + +'  // _,4. _,4. _,4.
 ```
 
 ###### Beat repeat
@@ -171,8 +173,8 @@ value: '16'
 - Copies the last N beat(s) and append it once
 
 ```javascript
-'...|79 78/*/77 75/*|...'; // 79 78/79 78/77 75/77 75
-'...|79 78/77 75/*2|...'; // 79 78/77 75/79 78/77 75
+'...|79 78/*/77 75/*|...' // 79 78/79 78/77 75/77 75
+'...|79 78/77 75/*2|...'  // 79 78/77 75/79 78/77 75
 ```
 
 ###### Measure repeat
@@ -183,15 +185,28 @@ value: '16'
 - Copies the last N measure(s) and append it once
 
 ```javascript
-'...|60/62/64/_|%|...'; // |60/62/64/_|60/62/64/_|
-'...|60/62/64/_|64/65/67/_|%2|...'; // |60/62/64/_|64/65/67/_|60/62/64/_|64/65/67/_|
+'...|60/62/64/_|%|...'             // |60/62/64/_|60/62/64/_|
+'...|60/62/64/_|64/65/67/_|%2|...' // |60/62/64/_|64/65/67/_|60/62/64/_|64/65/67/_| (note: measure seq count = 4)
 ```
 
 ### Seq
 
-- Measure sequence
+- Defines playback order of measure indices
+- Integer array
+- Required
+
+```javascript
+seq: [0, 1, 2, 1, 2, 3, 4, 5, 6]
+```
 
 ### Opt
+
+- Timbre parameters (Synthesizer parameter set)
+- String array (two levels)
+
+```javascript
+
+```
 
 ## Track grammar
 
@@ -251,19 +266,21 @@ let kms = {
     ],
     opt: [
         [
-            'env:.01-.15-.75-.05,vol:.85',
-            'env:.01-.151-.0-.0,vol:.85', // triplet
+            { env: [.01, .15, .75, .05], vol: .85 },
+            { env: [.01, .151, 0, 0], vol: .85 },       // triplet
         ],
         [
-            'env:.01-.15-.75-.05,vol:.85',
-            'env:.01-0-1-.03,vol:.85', // triplet
+            { env: [.01, .15, .75, .05], vol: .85 },
+            { env: [.01, 0, 1, .03], vol: .85 },        // triplet
         ],
-        ['env:.01-.15-1-.05'],
         [
-            'env:0-.15-0-.05,vol:.5',
-            'env:.01-.01-0-0,vol:.5', // closed hi-hat
-            'env:.01-.01-0-0,vol:.5,swg:1', // closed hi-hat swing
-            'env:0-.2-0-.13,vol:.5', // bass drum
+            { env: [.01, .15, 1, .05] }
+        ],
+        [
+            { env: [0, .15, 0, .05], vol: .5 },
+            { env: [.01, .01, 0, 0], vol: .5 },         // closed hi-hat
+            { env: [.01, .01, 0, 0], vol: .5, swg: 1 }, // closed hi-hat swing
+            { env: [0, .2, 0, .13], vol: .5 },          // bass drum
         ],
     ],
 };
