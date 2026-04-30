@@ -3,7 +3,7 @@
 ## Overview
 
 This package is an audio processing unit for JavaScript mini-games.  
-The synthesizer module generates and plays waveforms (Wraps the Web Audio API), and the sequencer module plays the synthesizer from the musical score format "KMSL".
+The synthesizer module generates and plays waveforms (Wraps the Web Audio API), and the sequencer module plays the synthesizer from the musical score format "KMS".
 
 ## Features
 
@@ -27,7 +27,7 @@ The synthesizer module generates and plays waveforms (Wraps the Web Audio API), 
         - Vibration
         - Tremolo
 - Sequencer
-    - KMSL parser
+    - KMS parser
     - Synth player
 
 ## Component diagram
@@ -52,7 +52,7 @@ graph TD
         noiseWaveStrategy -- optional--> lfsr
     end
     subgraph sequencerModule[Sequencer Module]
-        KMSL@{shape: lean-r} -.input.-> parseScore -.output.-> parsedScore@{shape: lean-r}
+        KMS@{shape: lean-r} -.input.-> parseScore -.output.-> parsedScore@{shape: lean-r}
         parsedScore -.input.-> convertEvent -.output.-> event@{shape: lean-r}
         Sequencer --has--> parseScore
         Sequencer --has--> convertEvent
