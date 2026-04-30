@@ -14,9 +14,9 @@ let kms = {
     time: String,  //Optional
     loop: Integer, //Optional
     value: String, //Optional
-    track: [String],
-    seq: [Integer],
-    opt: [String],
+    track: [ String ],
+    seq: [ Integer ],
+    opt: [ [ Object ]],
 };
 ```
 
@@ -202,10 +202,39 @@ seq: [0, 1, 2, 1, 2, 3, 4, 5, 6]
 ### Opt
 
 - Timbre parameters (Synthesizer parameter set)
-- String array (two levels)
+- Array (Track)
+    - Array object (Bank)
+- Track
+    - It must match the number of tracks
+- Bank
+    - Index 0 is required as it is the default value
+    - State the parameters of the synthesizer
 
 ```javascript
-
+// 4 tracks
+opt: [
+    // track: 0
+    [
+        { env: [.01, .15, .75, .05], vol: .85 },
+        { env: [.01, .151, 0, 0], vol: .85 },
+    ],
+    // track: 1
+    [
+        { env: [.01, .15, .75, .05], vol: .85 },
+        { env: [.01, 0, 1, .03], vol: .85 },
+    ],
+    // track: 2
+    [
+        { env: [.01, .15, 1, .05] }
+    ],
+    // track: 3
+    [
+        { env: [0, .15, 0, .05], vol: .5 },
+        { env: [.01, .01, 0, 0], vol: .5 },
+        { env: [.01, .01, 0, 0], vol: .5, swg: 1 },
+        { env: [0, .2, 0, .13], vol: .5 },
+    ],
+]
 ```
 
 ## Track grammar
@@ -231,8 +260,8 @@ beat_repeat    = "*" , [ power_of_2 ] ;
 measure_repeat = "%" , [ power_of_2 ] ;
 
 pitch      = digit
-　　　　　　 | digit , digit
-　　　　　　 | "1" , digit , digit ;
+           | digit , digit
+           | "1" , digit , digit ;
 
 value      = power_of_2 , [ "." ] , [ "t" ] ;
 
@@ -245,7 +274,7 @@ digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 <img src="https://img.plantuml.biz/plantuml/dsvg/VPBRJiCm38RlynIM9MwW0jPnr3Hfxu5GbMtUg82sIhDnmP3shhm8ZftqC11fPSV9P_jFb4NhhVEqh3R6Exjw1HbpU2VRxXn11f-01sIVLhvWPamAX5sIzGfU1L12eMIMAjAUgeX1m3GMJgUHgsfF1lfn04Uj7w_W1OuNGgV2KSDkl165nhtGBDJlH3MbNxsmc2V0B8ZQsxST3U9rkIqzFFCtCq56buW5_aeBq4181CyLREeFSaMzANBXJdGnT_OdPrHXx2fopFVnUFBpGLLfzX-2a_v8oNC75Pykf6ylnxj4bY4pZr5GJyob91VEnTw8VH0xkHCtpP5Jj5MwkMkCMhh4wI3zLgnctmyAFY8tNr2rbhVw0m00"/>
 
-## Examples
+## Example
 
 ### SMB Ground theme
 
