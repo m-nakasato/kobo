@@ -17,8 +17,8 @@
         "rollup": "^4.52.0"
     },
     "scripts": {
-        "lint": "eslint",
-        "test": "node --test || { echo \"[error] Test failed.\" >&2; exit 1; }",
+        "lint": "eslint || (echo [error] ESLint failed. >&2 && exit 1)",
+        "test": "node --test || (echo [error] Test failed. >&2 && exit 1)",
         "test_c": "c8 --all --include 'packages/**/src/**/*.mjs' --exclude '**/index.mjs' node --test",
         "test_r": "c8 --all --reporter=html --include 'packages/**/src/**/*.mjs' --exclude '**/index.mjs' node --test"
     }
