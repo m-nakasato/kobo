@@ -1,6 +1,5 @@
 import js from '@eslint/js';
 import importPlugin from 'eslint-plugin-import';
-import globals from 'globals';
 
 export default [
     {
@@ -20,7 +19,16 @@ export default [
             ecmaVersion: 'latest',
             sourceType: 'module',
             globals: {
-                ...globals.browser,
+                console: 'readonly',
+                crypto: 'readonly',
+                document: 'readonly',
+                window: 'readonly',
+                // Web Audio API globals
+                AudioBufferSourceNode: 'readonly',
+                GainNode: 'readonly',
+                OscillatorNode: 'readonly',
+                PeriodicWave: 'readonly',
+                // Build mode flag
                 __DEV__: 'readonly',
             },
         },
@@ -52,7 +60,8 @@ export default [
             ecmaVersion: 'latest',
             sourceType: 'module',
             globals: {
-                ...globals.node,
+                global: 'readonly',
+                process: 'readonly',
             },
         },
     },

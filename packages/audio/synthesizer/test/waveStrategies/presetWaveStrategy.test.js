@@ -1,12 +1,8 @@
-import { test, mock } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { presetWaveStrategy } from '../../src/waveStrategies/presetWaveStrategy.mjs';
 
 global.__DEV__ = true;
-
-// Stub: Frequency of 'A5' (Self-made utility func)
-import * as spn from '../../src/utils/spn2freq.mjs';
-mock.fn(spn, 'spn2freq', () => 880);
 
 // Mock: OscillatorNode for testing (Web Audio API is not available in Node.js)
 class MockOscillatorNode {
@@ -32,5 +28,5 @@ test('presetWaveStrategy creates OscillatorNode with correct frequency', () => {
 
     assert.ok(oscillatorNode instanceof MockOscillatorNode);
     assert.strictEqual(oscillatorNode.options.type, sourceType);
-    assert.strictEqual(oscillatorNode.options.frequency, 880); // Using stubbed spn2freq
+    assert.strictEqual(oscillatorNode.options.frequency, 880);
 });
