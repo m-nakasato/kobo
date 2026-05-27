@@ -30,5 +30,4 @@ test('presetWaveStrategy creates OscillatorNode with correct frequency', () => {
     assert.strictEqual(oscillatorNode.options.type, sourceType);
     // assert.strictEqual(oscillatorNode.options.frequency, 880);
     assert.strictEqual(oscillatorNode.options.frequency, 440);
-    console.log(oscillatorNode.options.frequency);
 });
