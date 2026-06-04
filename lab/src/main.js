@@ -7,12 +7,12 @@ import {
     lfsr,
 } from '@m-nakasato/kobo-audio';
 
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+
+console.log('Sample Rate:', audioCtx.sampleRate);
+
 document.getElementById('playPreset').onclick = () => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-
-    console.log('Sample Rate:', audioCtx.sampleRate);
-
     const waves = [
         new Wave(audioCtx, presetWaveStrategy, 'sine'),
         new Wave(audioCtx, presetWaveStrategy, 'square'),
@@ -22,18 +22,13 @@ document.getElementById('playPreset').onclick = () => {
 
     const synthesizer = new Synthesizer(audioCtx, waves);
     // synthesizer.play(null);
-    synthesizer.play('C4', { 'dur': 0.25, 'mode': 2, 'swp': 300 });
-    // synthesizer.play('A4', { dur: 1, mode: 2, vib: [20, 5, 'sawtooth'] });
+    // synthesizer.play(69, { 'dur': 0.25, 'mode': 2, 'swp': 300 });
+    synthesizer.play(60, { dur: 0.5, mode: 2, vib: [20, 5, 'sawtooth'] });
     // synthesizer.play('A4', { dur: 1, mode: 2, trm: [0.15, 5, 'sine'] });
     // synthesizer.play('A4', { dur: 1, mode: 2 });
 };
 
 document.getElementById('playTable').onclick = () => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-
-    console.log('Sample Rate:', audioCtx.sampleRate);
-
     const waves = [
         new Wave(audioCtx, tableWaveStrategy, 'F0'),
         new Wave(audioCtx, tableWaveStrategy, 'F000'),
@@ -43,18 +38,13 @@ document.getElementById('playTable').onclick = () => {
 
     const synthesizer = new Synthesizer(audioCtx, waves);
     // synthesizer.play(null);
-    synthesizer.play('C4', { 'dur': 0.25, 'mode': 0, 'swp': 300 });
+    synthesizer.play(69, { 'dur': 0.25, 'mode': 0, 'swp': 300 });
     // synthesizer.play('A4', { dur: 1, mode: 2, vib: [20, 5, 'sawtooth'] });
     // synthesizer.play('A4', { dur: 1, mode: 2, trm: [0.15, 5, 'sine'] });
     // synthesizer.play('A4', { dur: 1, mode: 2 });
 };
 
 document.getElementById('playNoise').onclick = () => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-
-    console.log('Sample Rate:', audioCtx.sampleRate);
-
     // const waves = [new Wave(audioCtx, noiseWaveStrategy)];
 
     // let periods = [
@@ -84,4 +74,24 @@ document.getElementById('playNoise').onclick = () => {
     synthesizer.play(0, { dur: 0.5, mode: 0, trm: [0.15, 5, 'square'] });
     // synthesizer.play(0, { dur: 0.5, mode: 0, trm: [0.15] });
     // synthesizer.play(0, { dur: 0.5, mode: 0 });
+};
+
+document.querySelectorAll('#keyboard input').forEach(button => {
+    button.onclick = () => {
+        const waves = [new Wave(audioCtx, presetWaveStrategy, 'sawtooth')];
+
+        const noteNames = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+        const noteName = button.value.toLowerCase();
+        const index = noteNames.indexOf(noteName);
+
+        const synthesizer = new Synthesizer(audioCtx, waves);
+        synthesizer.play(60 + index, { dur: 0.5 });
+    };
+});
+
+document.getElementById('resume').onclick = async () => {
+    if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+        console.log('AudioContext resumed');
+    }
 };

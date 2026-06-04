@@ -23,7 +23,7 @@ export class Synthesizer {
         gain.linearRampToValueAtTime(0, eTime);
     }
     play(
-        pitch,
+        noteNumber,
         {
             'mode': mode = 0,
             'sTime': sTime = this.#audioCtx.currentTime,
@@ -37,7 +37,7 @@ export class Synthesizer {
         } = {},
     ) {
         let eTime = sTime + dur;
-        let src = this.#waves[mode].getSourceNode(pitch);
+        let src = this.#waves[mode].getSourceNode(noteNumber);
         src.detune.value = det;
         src.detune.linearRampToValueAtTime(det + swp, eTime);
         if (src.frequency != undefined && vib != undefined) this.#lfo(src.frequency, ...vib);
@@ -63,6 +63,6 @@ export class Synthesizer {
         return { eTime };
     }
     discard() {
-        Object.keys(this.#tasks).forEach((key) => this.#tasks[key].stop());
+        Object.keys(this.#tasks).forEach(key => this.#tasks[key].stop());
     }
 }

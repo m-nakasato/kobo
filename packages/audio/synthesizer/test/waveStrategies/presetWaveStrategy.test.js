@@ -8,7 +8,8 @@ global.__DEV__ = true;
 class MockOscillatorNode {
     constructor(audioCtx, options) {
         this.audioCtx = audioCtx;
-        this.options = options;
+        this.frequency = options.frequency;
+        this.type = options.type;
     }
 }
 
@@ -27,6 +28,6 @@ test('presetWaveStrategy creates OscillatorNode with correct frequency', () => {
     const oscillatorNode = presetWaveStrategy.createSourceNode(audioCtx, sourceType, pitch);
 
     assert.ok(oscillatorNode instanceof MockOscillatorNode);
-    assert.strictEqual(oscillatorNode.options.type, sourceType);
-    assert.strictEqual(oscillatorNode.options.frequency, 880);
+    assert.strictEqual(oscillatorNode.frequency, 880);
+    assert.strictEqual(oscillatorNode.type, sourceType);
 });
