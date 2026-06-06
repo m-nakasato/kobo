@@ -36,11 +36,11 @@ test('tableWaveStrategy creates OscillatorNode with correct frequency', () => {
     const waveTable = 'FF00AA55';
     const audioCtx = {};
     const source = tableWaveStrategy.generateSource(waveTable, audioCtx);
-    const pitch = 'A4';
+    const pitch = 57;
 
     const oscillatorNode = tableWaveStrategy.createSourceNode(audioCtx, source, pitch);
 
     assert.ok(oscillatorNode instanceof MockOscillatorNode);
-    assert.strictEqual(oscillatorNode.frequency, 440);
+    assert.strictEqual(oscillatorNode.frequency, 220);
     assert.strictEqual(oscillatorNode.type, 'custom');
 });
