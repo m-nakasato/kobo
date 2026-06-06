@@ -24,7 +24,7 @@ test('presetWaveStrategy generates correct source type', () => {
 test('presetWaveStrategy creates OscillatorNode with correct frequency', () => {
     const audioCtx = {};
     const sourceType = 'square';
-    const pitch = 'A5';
+    const pitch = 81;
     const oscillatorNode = presetWaveStrategy.createSourceNode(audioCtx, sourceType, pitch);
 
     assert.ok(oscillatorNode instanceof MockOscillatorNode);
