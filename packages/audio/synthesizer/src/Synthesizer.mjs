@@ -1,4 +1,4 @@
-import { validatePlayArgs } from './validators/play.js';
+import { validatePlayArgs } from './validators/play.mjs';
 
 export class Synthesizer {
     #audioCtx;
