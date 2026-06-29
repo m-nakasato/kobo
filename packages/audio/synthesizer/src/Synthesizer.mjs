@@ -1,54 +1,54 @@
+import { validatePlayArgs } from './validators/play.mjs';
+
 export class Synthesizer {
     #audioCtx;
     #waves;
+    #lfo;
     #analyserNode;
     #tasks = {};
-    constructor(audioCtx, waves, analyserNode) {
+    constructor(audioCtx, waves, lfo, analyserNode) {
         this.#audioCtx = audioCtx;
         this.#waves = waves;
+        this.#lfo = lfo;
         this.#analyserNode = analyserNode;
     }
-    #lfo(target, depth, rate = 5, wave = 'sine') {
-        let lfo = new OscillatorNode(this.#audioCtx, { 'frequency': rate, 'type': wave });
-        lfo.start();
-        let gainNode = new GainNode(this.#audioCtx, { 'gain': depth });
-        lfo.connect(gainNode).connect(target);
+    static envelope(gain, startTime, endTime, volume, envelope) {
+        let [a = 0.01, d = 0.01, s = 0.5, r = 0.01] = envelope;
+        gain.setValueAtTime(0, startTime);
+        gain.linearRampToValueAtTime(volume, startTime + a);
+        gain.linearRampToValueAtTime(volume * s, startTime + a + d);
+        gain.setValueAtTime(volume * s, endTime - r);
+        gain.linearRampToValueAtTime(0, endTime);
     }
-    static envelope(gain, sTime, eTime, vol, adsr = []) {
-        let [a = 0.01, d = 0.01, s = 0.5, r = 0.01] = adsr;
-        gain.setValueAtTime(0, sTime);
-        gain.linearRampToValueAtTime(vol, sTime + a);
-        gain.linearRampToValueAtTime(vol * s, sTime + a + d);
-        gain.setValueAtTime(vol * s, eTime - r);
-        gain.linearRampToValueAtTime(0, eTime);
-    }
-    play(
-        noteNumber,
-        {
-            'mode': mode = 0,
-            'sTime': sTime = this.#audioCtx.currentTime,
-            'dur': dur = 0.03,
-            'vol': vol = 1,
-            'det': det = 0,
-            'swp': swp = 0,
-            'env': env,
-            'vib': vib,
-            'trm': trm,
-        } = {},
-    ) {
-        let eTime = sTime + dur;
+    play(noteNumber, options = {}) {
+        if (__DEV__) validatePlayArgs(noteNumber, options, this.#waves);
+
+        const {
+            'mod': mode = 0,
+            'sta': startTime = this.#audioCtx.currentTime,
+            'dur': duration = 0.03,
+            'vol': volume = 1,
+            'det': detune = 0,
+            'swp': sweep = 0,
+            'env': envelope = [],
+            'vib': vibrato,
+            'trm': tremolo,
+        } = options;
+
+        let endTime = startTime + duration;
         let src = this.#waves[mode].getSourceNode(noteNumber);
-        src.detune.value = det;
-        src.detune.linearRampToValueAtTime(det + swp, eTime);
-        if (src.frequency != undefined && vib != undefined) this.#lfo(src.frequency, ...vib);
-        // if (!(this.#wav instanceof TableWave)) vol /= 4;
+        src.detune.value = detune;
+        src.detune.linearRampToValueAtTime(detune + sweep, endTime);
+        if (src.frequency !== undefined && vibrato !== undefined)
+            this.#lfo(this.#audioCtx, src.frequency, ...vibrato);
+        // if (!(this.#wav instanceof TableWave)) volume /= 4;
         let gainNode = new GainNode(this.#audioCtx);
-        Synthesizer.envelope(gainNode.gain, sTime, eTime, vol, env);
-        if (trm != undefined) this.#lfo(gainNode.gain, ...trm);
+        Synthesizer.envelope(gainNode.gain, startTime, endTime, volume, envelope);
+        if (tremolo !== undefined) this.#lfo(this.#audioCtx, gainNode.gain, ...tremolo);
         if (this.#analyserNode) gainNode.connect(this.#analyserNode);
         src.connect(gainNode).connect(this.#audioCtx.destination);
-        src.start(sTime);
-        src.stop(eTime);
+        src.start(startTime);
+        src.stop(endTime);
         let UUID = crypto.randomUUID();
         this.#tasks[UUID] = src;
         src.onended = () => {
@@ -60,7 +60,7 @@ export class Synthesizer {
             delete this.#tasks[UUID];
         };
         // return {eTime, freq: this.#wav.freq(pitch)};
-        return { eTime };
+        return { end: endTime };
     }
     discard() {
         Object.keys(this.#tasks).forEach(key => this.#tasks[key].stop());

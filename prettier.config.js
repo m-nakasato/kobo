@@ -6,4 +6,5 @@ export default {
     arrowParens: 'avoid',
     quoteProps: 'preserve',
     printWidth: 100,
+    htmlWhitespaceSensitivity: 'ignore',
 };
