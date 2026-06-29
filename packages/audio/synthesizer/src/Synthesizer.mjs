@@ -3,18 +3,14 @@ import { validatePlayArgs } from './validators/play.mjs';
 export class Synthesizer {
     #audioCtx;
     #waves;
+    #lfo;
     #analyserNode;
     #tasks = {};
-    constructor(audioCtx, waves, analyserNode) {
+    constructor(audioCtx, waves, lfo, analyserNode) {
         this.#audioCtx = audioCtx;
         this.#waves = waves;
+        this.#lfo = lfo;
         this.#analyserNode = analyserNode;
-    }
-    #lfo(target, depth, rate = 5, wave = 'sine') {
-        let lfo = new OscillatorNode(this.#audioCtx, { 'frequency': rate, 'type': wave });
-        lfo.start();
-        let gainNode = new GainNode(this.#audioCtx, { 'gain': depth });
-        lfo.connect(gainNode).connect(target);
     }
     static envelope(gain, startTime, endTime, volume, envelope) {
         let [a = 0.01, d = 0.01, s = 0.5, r = 0.01] = envelope;
@@ -43,12 +39,12 @@ export class Synthesizer {
         let src = this.#waves[mode].getSourceNode(noteNumber);
         src.detune.value = detune;
         src.detune.linearRampToValueAtTime(detune + sweep, endTime);
-        if (src.frequency != undefined && vibrato != undefined)
-            this.#lfo(src.frequency, ...vibrato);
+        if (src.frequency !== undefined && vibrato !== undefined)
+            this.#lfo(this.#audioCtx, src.frequency, ...vibrato);
         // if (!(this.#wav instanceof TableWave)) volume /= 4;
         let gainNode = new GainNode(this.#audioCtx);
         Synthesizer.envelope(gainNode.gain, startTime, endTime, volume, envelope);
-        if (tremolo != undefined) this.#lfo(gainNode.gain, ...tremolo);
+        if (tremolo !== undefined) this.#lfo(this.#audioCtx, gainNode.gain, ...tremolo);
         if (this.#analyserNode) gainNode.connect(this.#analyserNode);
         src.connect(gainNode).connect(this.#audioCtx.destination);
         src.start(startTime);

@@ -5,6 +5,7 @@ import {
     tableWaveStrategy,
     noiseWaveStrategy,
     lfsr,
+    lfo,
 } from '@m-nakasato/kobo-audio';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -44,8 +45,8 @@ const noiseWaves = [
 ];
 
 const synthesizers = [
-    new Synthesizer(audioCtx, presetWaves),
-    new Synthesizer(audioCtx, tableWaves),
+    new Synthesizer(audioCtx, presetWaves, lfo),
+    new Synthesizer(audioCtx, tableWaves, lfo),
     new Synthesizer(audioCtx, noiseWaves),
 ];
 
