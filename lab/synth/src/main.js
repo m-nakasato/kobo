@@ -6,10 +6,13 @@ import {
     noiseWaveStrategy,
     lfsr,
     lfo,
-} from '@m-nakasato/kobo-audio';
+} from '@m-nakasato/kobo-audio/synthesizer';
+import { Sequencer } from '@m-nakasato/kobo-audio/sequencer';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
+const sequencer = new Sequencer();
+console.log('Sequencer:', sequencer);
 
 console.log('Sample Rate:', audioCtx.sampleRate);
 
