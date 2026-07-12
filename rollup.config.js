@@ -21,7 +21,7 @@ export default () => {
                 plugins: [
                     terser({
                         compress: {
-                            drop_console: process.env.__DEV__ !== 'true',
+                            drop_console: process.env.NODE_ENV === 'production',
                             passes: 2,
                         },
                         mangle: {
