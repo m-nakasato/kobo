@@ -1,1 +1,1 @@
-export { Sequencer } from './Sequencer.mjs';
+export { parse } from './parser/parse.mjs';
