@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>js13k-studio-experiment</title>
+        <script src="b.js" defer></script>
+    </head>
+    <body>
+        <input type="button" id="resume" value="resume" />
+        <table id="demo">
+            <tr>
+                <th>pitch</th>
+                <td>
+                    <label>
+                        <input type="radio" name="pitch" value="60" checked />
+                        C4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="62" />
+                        D4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="64" />
+                        E4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="65" />
+                        F4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="67" />
+                        G4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="69" />
+                        A4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="71" />
+                        B4
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="pitch" value="0" />
+                        0
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="1" />
+                        1
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="2" />
+                        2
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="3" />
+                        3
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="4" />
+                        4
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="5" />
+                        5
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="6" />
+                        6
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="7" />
+                        7
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="8" />
+                        8
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="9" />
+                        9
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="10" />
+                        10
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="11" />
+                        11
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="12" />
+                        12
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="pitch" value="-1" />
+                        -1
+                    </label>
+                    <label>
+                        <input type="radio" name="pitch" value="128" />
+                        128
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <th>wave</th>
+                <td>
+                    <label>
+                        <input type="radio" name="wave" value="0" checked />
+                        preset
+                        <select name="presetMode">
+                            <option value="">empty</option>
+                            <option value="-1">invalid (-1)</option>
+                            <option value="0">sine</option>
+                            <option value="1" selected>square</option>
+                            <option value="2">sawtooth</option>
+                            <option value="3">triangle</option>
+                            <option value="4">invalid (4)</option>
+                        </select>
+                        ,
+                    </label>
+                    <label>
+                        <input type="radio" name="wave" value="1" />
+                        table
+                        <select name="tableMode">
+                            <option value="">empty</option>
+                            <option value="-1">invalid (-1)</option>
+                            <option value="0">50%</option>
+                            <option value="1">25%</option>
+                            <option value="2" selected>12.5%</option>
+                            <option value="3">triangle</option>
+                            <option value="4">invalid (4)</option>
+                        </select>
+                        ,
+                    </label>
+                    <label>
+                        <input type="radio" name="wave" value="2" />
+                        noise
+                        <select name="noiseMode">
+                            <option value="">empty</option>
+                            <option value="-1">invalid (-1)</option>
+                            <option value="0" selected>white</option>
+                            <option value="1">random</option>
+                            <option value="2">long</option>
+                            <option value="3">short</option>
+                            <option value="4">invalid (4)</option>
+                        </select>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <th>startTime</th>
+                <td>
+                    <input type="text" name="startTime" />
+                </td>
+            </tr>
+            <tr>
+                <th>duration</th>
+                <td>
+                    <input type="range" name="duration" min="0" max="1" step="0.1" value="0.5" />
+                </td>
+            </tr>
+            <tr>
+                <th>volume</th>
+                <td>
+                    <input type="range" name="volume" min="-.1" max="2.1" step="0.1" value="1" />
+                </td>
+            </tr>
+            <tr>
+                <th>detune</th>
+                <td>
+                    <input type="text" name="detune" />
+                </td>
+            </tr>
+            <tr>
+                <th>sweep</th>
+                <td>
+                    <input type="range" name="sweep" min="-4000" max="4000" step="100" value="0" />
+                </td>
+            </tr>
+            <tr>
+                <th>envelope</th>
+                <td>
+                    <label>
+                        attack:
+                        <input
+                            type="range"
+                            name="envAttack"
+                            value=".01"
+                            min=".01"
+                            max="2"
+                            step=".01"
+                        />
+                    </label>
+                    ,
+                    <label>
+                        decay:
+                        <input
+                            type="range"
+                            name="envDecay"
+                            value=".01"
+                            min=".01"
+                            max="2"
+                            step=".01"
+                        />
+                    </label>
+                    ,
+                    <label>
+                        sustain:
+                        <input
+                            type="range"
+                            name="envSustain"
+                            value=".5"
+                            min="0"
+                            max="2"
+                            step=".1"
+                        />
+                    </label>
+                    ,
+                    <label>
+                        release:
+                        <input
+                            type="range"
+                            name="envRelease"
+                            value=".01"
+                            min=".01"
+                            max="2"
+                            step=".1"
+                        />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <th>vibrato</th>
+                <td>
+                    <label>
+                        depth:
+                        <input type="number" name="vibDepth" value="0" min="0" max="20" step="5" />
+                    </label>
+                    ,
+                    <label>
+                        rate:
+                        <input type="number" name="vibRate" value="5" min="0" max="10" step="1" />
+                    </label>
+                    ,
+                    <label>
+                        wave:
+                        <select name="vibWave">
+                            <option value="sine">sine</option>
+                            <option value="square" selected>square</option>
+                            <option value="sawtooth">sawtooth</option>
+                            <option value="triangle">triangle</option>
+                        </select>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <th>tremolo</th>
+                <td>
+                    <label>
+                        depth:
+                        <input type="number" name="trmDepth" value="0" min="0" max=".5" step=".1" />
+                    </label>
+                    ,
+                    <label>
+                        rate:
+                        <input type="number" name="trmRate" value="5" min="0" max="10" step="1" />
+                    </label>
+                    ,
+                    <label>
+                        wave:
+                        <select name="trmWave">
+                            <option value="sine">sine</option>
+                            <option value="square" selected>square</option>
+                            <option value="sawtooth">sawtooth</option>
+                            <option value="triangle">triangle</option>
+                        </select>
+                    </label>
+                </td>
+            </tr>
+        </table>
+        <div>
+            <input type="button" id="play" value="play" />
+        </div>
+    </body>
+</html>

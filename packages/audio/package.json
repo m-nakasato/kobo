@@ -6,6 +6,7 @@
     "author": "m-nakasato",
     "license": "MIT",
     "exports": {
-        ".": "./index.mjs"
+        "./synthesizer": "./synthesizer/src/index.mjs",
+        "./sequencer": "./sequencer/src/index.mjs"
     }
 }

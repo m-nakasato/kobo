@@ -1,18 +1,10 @@
 import js from '@eslint/js';
-import importPlugin from 'eslint-plugin-import';
 
 export default [
     {
         ignores: ['**/dist/**'],
     },
     js.configs.recommended,
-    {
-        files: ['**/src/**/*.{js,mjs}', '**/test/**/*.test.js'],
-        ...importPlugin.flatConfigs.recommended,
-        rules: {
-            'import/no-unresolved': 'error',
-        },
-    },
     {
         files: ['**/src/**/*.{js,mjs}'],
         languageOptions: {

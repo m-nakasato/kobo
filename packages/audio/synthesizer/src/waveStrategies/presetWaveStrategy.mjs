@@ -1,11 +1,11 @@
-import { spn2freq } from '../utils/spn2freq.mjs';
+import { num2freq } from '../utils/num2freq.mjs';
 
 export const presetWaveStrategy = {
     generateSource: type => type,
-    createSourceNode: (audioCtx, source, pitch) => {
+    createSourceNode: (audioCtx, source, noteNumber) => {
         return new OscillatorNode(audioCtx, {
             'type': source,
-            'frequency': spn2freq(pitch),
+            'frequency': num2freq(noteNumber),
         });
     },
 };

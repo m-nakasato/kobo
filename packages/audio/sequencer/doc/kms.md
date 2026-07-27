@@ -1,8 +1,6 @@
-# About KMS
+# KMS
 
 KMS is a minimal musical score DSL designed for the KOBO Sequencer.
-
-It focuses on clear structure, functional semantics, and compact notation suitable for code golf, while remaining easy for humans and tools to read.
 
 ## Structure
 
@@ -11,10 +9,10 @@ KMS is represented as a JavaScript object with the following top-level fields:
 ```javascript
 let kms = {
     bpm: Integer,
-    time: String,  //Optional
-    loop: Integer, //Optional
-    value: String, //Optional
-    track: [ String ],
+    time: String,  // Optional
+    loop: Integer, // Optional
+    value: String, // Optional
+    track: [ String ], // track -> measure -> event
     seq: [ Integer ],
     opt: [ [ Object ]],
 };
@@ -38,7 +36,7 @@ bpm: 160
 
 - Time signature
 - String
-- Choices: '2/2', '2/4', '3/4', '4/4', '6/8'
+- Choices: '2/4', '3/4', '4/4'
 - Default: '4/4'
 - Cannot be changed during playback
 
@@ -79,30 +77,14 @@ value: '16'
 #### Measure
 
 - Measures are separated by `|`
-- Each measure can contains beats as specified by the time signature
+- Each measure can contains events
 - Repeat the previous measure using `%` (see below)
 - Playback order is defined by the `seq` (see below)
 
 ```javascript
 // Time: 2/2
 //   ┌── measure 0 ───┐ ┌─── measure 1 ───┐ ┌────────── measure 2 ───────────┐ ┌─── measure 3 ───┐
-//   ┌ beat ─┐ ┌ beat ┐ ┌ beat ─┐ ┌ beat ─┐ ┌─────── beat ────────┐ ┌─ beat ─┐ ┌ beat ─┐ ┌ beat ─┐
-'...|72 _,4 67/_,4 64 _|_ 69 _ 71/_ 70 69 _|67,4t,1 76,4t,1 79,4t,1/81 _ 77 79|_ 76 _ 72/74 71 _,4|...'
-```
-
-#### Beat
-
-- Beats are separated by `/`
-- Each beat can contains events
-- Events may span beats within the measure size
-- If the next beat is empty, the `/` separator may be omitted
-- Repeat the previous beat using `*` (see below)
-
-```javascript
-// Time: 2/2
-//   ┌──────────────── measure ──────────────┐
-//   ┌──── beat ─────┐ ┌─────── beat ────────┐
-'...|67,4t,1 77,4t,1 +/77,4t,1 76,4t,1 74,4t,1|...'
+'...|72 _,4 67 _,4 64 _|_ 69 _ 71 _ 70 69 _|67,4t,1 76,4t,1 79,4t,1 81 _ 77 79|_ 76 _ 72 74 71 _,4|...'
 ```
 
 #### Event
@@ -163,18 +145,6 @@ value: '16'
 ```javascript
 '77,4t,1 +' // 77,4t,1 77,4t,1
 '_,4. + +'  // _,4. _,4. _,4.
-```
-
-###### Beat repeat
-
-- `*`, `*2`, `*4`, `*8`
-- Repeats the preceding N beat(s) as a block
-- Default N is 1
-- Copies the last N beat(s) and append it once
-
-```javascript
-'...|79 78/*/77 75/*|...' // 79 78/79 78/77 75/77 75
-'...|79 78/77 75/*2|...'  // 79 78/77 75/79 78/77 75
 ```
 
 ###### Measure repeat
@@ -242,28 +212,23 @@ opt: [
 ### EBNF
 
 ```EBNF
-track      = measure , { "|" , measure } ;
+track      = measure , { "|" , ( measure | ( "%" , [ power_of_2 ] ) ) } ;
 
-measure    = beat , { "/" , beat } ;
-
-beat       = event , { " " , event } ;
+measure    = event , { " " , ( event | ( "+" , [ power_of_2 ] ) ) } ;
 
 event      = note
-           | rest
-           | "+"
-           | beat_repeat
-           | measure_repeat ;
+           | rest;
 
-note       = pitch , [ "," , value , [ "," , digit ] ] ;
+note       = pitch , [ "," , value , [ "," , option ] ] ;
 rest       = "_" , [ "," , value ] ;
-beat_repeat    = "*" , [ power_of_2 ] ;
-measure_repeat = "%" , [ power_of_2 ] ;
 
 pitch      = digit
            | digit , digit
            | "1" , digit , digit ;
 
 value      = power_of_2 , [ "." ] , [ "t" ] ;
+
+option     = digit ;
 
 power_of_2 = "1" | "2" | "4" | "8" | "16" | "32";
 
@@ -272,16 +237,15 @@ digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 ### RailRoad diagram
 
-<img src="https://img.plantuml.biz/plantuml/dsvg/VPBRJiCm38RlynIM9MwW0jPnr3Hfxu5GbMtUg82sIhDnmP3shhm8ZftqC11fPSV9P_jFb4NhhVEqh3R6Exjw1HbpU2VRxXn11f-01sIVLhvWPamAX5sIzGfU1L12eMIMAjAUgeX1m3GMJgUHgsfF1lfn04Uj7w_W1OuNGgV2KSDkl165nhtGBDJlH3MbNxsmc2V0B8ZQsxST3U9rkIqzFFCtCq56buW5_aeBq4181CyLREeFSaMzANBXJdGnT_OdPrHXx2fopFVnUFBpGLLfzX-2a_v8oNC75Pykf6ylnxj4bY4pZr5GJyob91VEnTw8VH0xkHCtpP5Jj5MwkMkCMhh4wI3zLgnctmyAFY8tNr2rbhVw0m00"/>
+<img src="https://www.plantuml.com/plantuml/dsvg/VL9jIyCm4FxUNt4S28f3NEUB8eFz3ncbRZSjQbFIs_nW_UzUdf0iYfZ1NNRtl3o1haPjlSfJlwlKjvjNmbdIkxJZtWlDw9DuOkkdUJRPdK_2x946zo6-SRkcfZMTsU-B7geg8I4b1-ar2b4KYXF8dFyd0rnAr3kLYevd8Y-Z6YeiAA66JZSlaEGPMp-qRtif_hj1EzURoTeCWa1cSiE_UG1La4oeRVVSwSyO6D7ihnNFEIroDqM8vyJ7fyF-WiqMD-KO86Ok0uHfmLl2oEngr2lKEzJv3TgYPgE0czzxYKr9N1JqQzJ8lYq4xzdCLz9lmpVp3G00"/>
 
 ## Example
 
 ### SMB Ground theme
 
 ```javascript
-let kms = {
+const kms = {
     bpm: 100,
-    time: '2/2',
     loop: 1,
     track: [
         '76 + _ 76/_ 72 76 _|79 _,4./67 _,4.|72 _,4 67/_,4 64 _|_ 69 _ 71/_ 70 69 _|67,4t,1 76,4t,1 79,4t,1/81 _ 77 79|_ 76 _ 72/74 71 _,4|_,4 79 78/77 75 _ 76|_ 68 69 72/_ 69 72 74|_,4 79 78/77 75 _ 76|_ 84 _ 84/84 _,4.|_,4 79 78/77 75 _ 76|_ 68 69 72/_ 69 72 74|_,4 75 _/_ 74 _,4|72 _,4./_,2|72 + _ 72/_ 72 74 _|76 72 _ 69/67 _,4.|72 + _ 72/_ 72 74 76|_,2/*|76 72 _ 67/_,4 68 _|69 77 _ 77/69 _,4.|71,4t,1 81,4t,1 +/81,4t,1 79,4t,1 77,4t,1|76 72 _ 69/67 _,4.|71 77 _ 77/77,4t,1 76,4t,1 74,4t,1|72 _,4./_,2',

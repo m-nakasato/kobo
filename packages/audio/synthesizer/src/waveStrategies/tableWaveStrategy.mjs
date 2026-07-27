@@ -1,4 +1,4 @@
-import { spn2freq } from '../utils/spn2freq.mjs';
+import { num2freq } from '../utils/num2freq.mjs';
 import { dft } from '../utils/dft.mjs';
 
 export const tableWaveStrategy = {
@@ -9,10 +9,10 @@ export const tableWaveStrategy = {
         }
         return new PeriodicWave(audioCtx, dft(d, 512));
     },
-    createSourceNode: (audioCtx, source, pitch) => {
+    createSourceNode: (audioCtx, source, noteNumber) => {
         return new OscillatorNode(audioCtx, {
             'periodicWave': source,
-            'frequency': spn2freq(pitch),
+            'frequency': num2freq(noteNumber),
         });
     },
 };
