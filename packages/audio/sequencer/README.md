@@ -2,9 +2,9 @@
 
 ## API
 
-## KMSL (KOBO Musical Score Language)
+## KMS (KOBO Musical Score Language)
 
-KMSL is musical score format for KOBO Audio Sequencer.
+KMS is musical score format for KOBO Audio Sequencer.
 
 ### 基本構文
 
