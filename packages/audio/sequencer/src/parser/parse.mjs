@@ -8,7 +8,7 @@ export const parse = (kms) => {
 
     return kms.track.map((trackString, tid) =>
         parseTrack(trackString).map((measure) =>
-            measure.map((event) => buildEvent(event, kms.bpm, kms.opt[tid])),
+            measure.map((event) => buildEvent(event, kms.bpm, kms.opt[tid], kms.value)),
         ),
     );
 };
