@@ -26,7 +26,7 @@ The synthesizer module generates and plays waveforms (Wraps the Web Audio API), 
     - LFO
         - Vibration
         - Tremolo
-- Sequencer
+- [Sequencer](./sequencer/)
     - KMS parser
     - Synth player
 

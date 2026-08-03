@@ -14,7 +14,13 @@ export default [
                 console: 'readonly',
                 crypto: 'readonly',
                 document: 'readonly',
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                setInterval: 'readonly',
+                clearInterval: 'readonly',
                 window: 'readonly',
+                requestAnimationFrame: 'readonly',
+                cancelAnimationFrame: 'readonly',
                 // Web Audio API globals
                 AudioBufferSourceNode: 'readonly',
                 GainNode: 'readonly',
