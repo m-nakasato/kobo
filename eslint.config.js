@@ -21,6 +21,7 @@ export default [
                 window: 'readonly',
                 requestAnimationFrame: 'readonly',
                 cancelAnimationFrame: 'readonly',
+                OffscreenCanvas: 'readonly',
                 // Web Audio API globals
                 AudioBufferSourceNode: 'readonly',
                 GainNode: 'readonly',
@@ -42,6 +43,7 @@ export default [
             'no-new': 'warn',
             'no-param-reassign': 'warn',
             'no-self-compare': 'warn',
+            'no-sparse-arrays': 'warn',
             'no-unmodified-loop-condition': 'warn',
             'no-unused-expressions': 'warn',
             'no-use-before-define': 'warn',
