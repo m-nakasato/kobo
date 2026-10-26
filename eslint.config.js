@@ -6,7 +6,7 @@ export default [
     },
     js.configs.recommended,
     {
-        files: ['**/src/**/*.{js,mjs}'],
+        files: ['**/src/**/*.{js,mjs}', '**/tool/**/*.{js,mjs}'],
         languageOptions: {
             ecmaVersion: 'latest',
             sourceType: 'module',
@@ -14,6 +14,8 @@ export default [
                 console: 'readonly',
                 crypto: 'readonly',
                 document: 'readonly',
+                Event: 'readonly',
+                CustomEvent: 'readonly',
                 setTimeout: 'readonly',
                 clearTimeout: 'readonly',
                 setInterval: 'readonly',
@@ -29,6 +31,8 @@ export default [
                 PeriodicWave: 'readonly',
                 // Build mode flag
                 __DEV__: 'readonly',
+                // External lib
+                Handsontable: 'readonly',
             },
         },
         rules: {
