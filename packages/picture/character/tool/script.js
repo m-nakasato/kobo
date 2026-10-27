@@ -23,10 +23,21 @@ function setColorSliders(rgb) {
 }
 setColorSliders('000');
 
-// function bmpRender() {}
-
 // const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
 const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
+
+Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
+    if (value === null) return;
+    td.innerText = value;
+    // td.style.backgroundColor = getBgColor(value);
+    // td.style.color = getColor(value);
+    // const palette = document.querySelector('#bmp select');
+    // console.log(palette.value);
+    // console.log();
+    td.style.backgroundColor = '#080';
+    td.style.color = '#fff';
+});
+
 const bmp = new Handsontable(document.getElementById('bmp'), {
     data: Array(8)
         .fill(undefined)
@@ -41,6 +52,7 @@ const bmp = new Handsontable(document.getElementById('bmp'), {
             (change) => (change[3] = change[3].replace(/[a-f]/g, (match) => match.toUpperCase())),
         );
     },
+    renderer: 'bmp',
     licenseKey: 'non-commercial-and-evaluation',
 });
 
@@ -53,14 +65,15 @@ document.getElementById('test').onclick = () => {
 
 document.getElementById('view01').classList.add('current');
 
-Handsontable.renderers.registerRenderer('color', (hotInstance, td, row, column, prop, value) => {
+Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
     if (value === null) return;
     td.innerText = value;
     td.style.backgroundColor = getBgColor(value);
     td.style.color = getColor(value);
 });
 
-const palette = new Handsontable(document.getElementById('palette'), {
+// eslint-disable-next-line no-new
+new Handsontable(document.getElementById('palette'), {
     // data: [['333']],
     colHeaders: Array(8)
         .fill(undefined)
@@ -95,10 +108,9 @@ const palette = new Handsontable(document.getElementById('palette'), {
         if (rgb === null) rgb = '000';
         setColorSliders(rgb);
     },
-    renderer: 'color',
+    renderer: 'palette',
     licenseKey: 'non-commercial-and-evaluation',
 });
-palette.getSourceData(); //ダミー
 
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
 colorSliders.forEach((colorSlider) => {
@@ -141,6 +153,7 @@ colorList.forEach((tbl, i) => {
     const div = document.createElement('div');
     div.id = 'tbl' + i;
     document.getElementById('colors').appendChild(div);
+    // eslint-disable-next-line no-new
     new Handsontable(div, {
         data: tbl,
         colWidths: 21,
@@ -153,7 +166,7 @@ colorList.forEach((tbl, i) => {
             this.deselectCell();
             setColorSliders(rgb);
         },
-        renderer: 'color',
+        renderer: 'palette',
         licenseKey: 'non-commercial-and-evaluation',
     });
 });
