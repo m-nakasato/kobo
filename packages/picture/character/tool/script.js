@@ -23,19 +23,91 @@ function setColorSliders(rgb) {
 }
 setColorSliders('000');
 
+Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
+    td.innerText = value ?? '';
+    td.style.backgroundColor = '';
+    td.style.color = '';
+    if (value === null) return;
+    td.style.backgroundColor = getBgColor(value);
+    td.style.color = getColor(value);
+});
+
+const palette = new Handsontable(document.getElementById('palette'), {
+    // data: [['333']],
+    colHeaders: Array(8)
+        .fill(undefined)
+        .map((_, i) => i.toString(16).toUpperCase()),
+    rowHeaders: Array(8)
+        .fill(undefined)
+        .map((_, i) => 'p' + i),
+    minCols: 8,
+    maxCols: 8,
+    minRows: 8,
+    maxRows: 8,
+    outsideClickDeselects: false,
+    selectionMode: 'single',
+    cells(row, col) {
+        if (col === 0) return { readOnly: true };
+    },
+    // readOnly: true,
+    editor: false,
+    fillHandle: false,
+    afterInit() {
+        const paletteElement = document.getElementById('palette');
+        const colorsElement = document.getElementById('colors');
+        paletteElement.addEventListener('sliderChange', (e) => {
+            const selection = this.getSelected();
+            if (selection && selection.length > 0) {
+                const [activeRow, activeCol] = selection[0];
+                const nerRgbStr = e.detail.rgb;
+                if (activeCol !== 0 && this.getDataAtCell(activeRow, activeCol) != nerRgbStr) {
+                    this.setDataAtCell(activeRow, activeCol, nerRgbStr);
+                }
+            }
+        });
+        document.addEventListener('mousedown', (event) => {
+            const target = event.target;
+            if (
+                !paletteElement.contains(target) &&
+                !colorsElement.contains(target)
+            ) {
+                this.deselectCell();
+            }
+        });
+    },
+    beforeSetRangeStart(coords) {
+        if (coords.col === 0) {
+            this.deselectCell();
+            return false;
+        }
+    },
+    beforeSetRangeEnd(coords) {
+        if (coords.col === 0) {
+            this.deselectCell();
+            return false;
+        }
+    },
+    afterSelectionEnd(row, col) {
+        let rgb = this.getDataAtCell(row, col);
+        if (rgb !== null) setColorSliders(rgb);
+    },
+    renderer: 'palette',
+    licenseKey: 'non-commercial-and-evaluation',
+});
+
 // const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
 const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
 
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
     if (value === null) return;
     td.innerText = value;
-    // td.style.backgroundColor = getBgColor(value);
-    // td.style.color = getColor(value);
-    // const palette = document.querySelector('#bmp select');
-    // console.log(palette.value);
-    // console.log();
-    td.style.backgroundColor = '#080';
-    td.style.color = '#fff';
+    const paletteId = document.querySelector('#bmp select');
+    const paletteTbl = palette.getData();
+    const color = paletteTbl[paletteId.value][value];
+    console.log(color);
+    if (color === null) return;
+    td.style.backgroundColor = getBgColor(color);
+    td.style.color = getColor(color);
 });
 
 const bmp = new Handsontable(document.getElementById('bmp'), {
@@ -56,6 +128,10 @@ const bmp = new Handsontable(document.getElementById('bmp'), {
     licenseKey: 'non-commercial-and-evaluation',
 });
 
+palette.addHook('afterChange', () => bmp.render());
+
+document.querySelector('#bmp select').onchange = () => bmp.render();
+
 document.getElementById('test').onclick = () => {
     const data = bmp.getData();
     data[2][2] = 2;
@@ -64,53 +140,6 @@ document.getElementById('test').onclick = () => {
 };
 
 document.getElementById('view01').classList.add('current');
-
-Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
-    if (value === null) return;
-    td.innerText = value;
-    td.style.backgroundColor = getBgColor(value);
-    td.style.color = getColor(value);
-});
-
-// eslint-disable-next-line no-new
-new Handsontable(document.getElementById('palette'), {
-    // data: [['333']],
-    colHeaders: Array(8)
-        .fill(undefined)
-        .map((_, i) => i.toString(16).toUpperCase()),
-    rowHeaders: Array(8)
-        .fill(undefined)
-        .map((_, i) => 'p' + i),
-    minCols: 8,
-    maxCols: 8,
-    minRows: 8,
-    maxRows: 8,
-    outsideClickDeselects: false,
-    selectionMode: 'single',
-    // readOnly: true,
-    editor: false,
-    fillHandle: false,
-    afterInit() {
-        this.selectCell(0, 0);
-        document.getElementById('palette').addEventListener('sliderChange', (e) => {
-            const selection = this.getSelected();
-            if (selection && selection.length > 0) {
-                const [activeRow, activeCol] = selection[0];
-                const nerRgbStr = e.detail.rgb;
-                if (this.getDataAtCell(activeRow, activeCol) != nerRgbStr) {
-                    this.setDataAtCell(activeRow, activeCol, nerRgbStr);
-                }
-            }
-        });
-    },
-    afterSelectionEnd(row, col) {
-        let rgb = this.getDataAtCell(row, col);
-        if (rgb === null) rgb = '000';
-        setColorSliders(rgb);
-    },
-    renderer: 'palette',
-    licenseKey: 'non-commercial-and-evaluation',
-});
 
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
 colorSliders.forEach((colorSlider) => {
