@@ -23,6 +23,23 @@ function setColorSliders(rgb) {
 }
 setColorSliders('000');
 
+const colorSliders = document.querySelectorAll('#colors > div:first-child input');
+colorSliders.forEach((colorSlider) => {
+    colorSlider.oninput = (e) => {
+        e.target.nextElementSibling.innerText = e.target.value;
+        const rgb = Array.from(colorSliders, ({ value }) => value * (255 / (COLOR_DEPTH - 1))).join(
+            ',',
+        );
+        colorSlider.parentElement.parentElement.style.background = `rgb(${rgb})`;
+        const sliderEvent = new CustomEvent('sliderChange', {
+            detail: {
+                rgb: [colorSliders[0].value, colorSliders[1].value, colorSliders[2].value].join(''),
+            },
+        });
+        document.getElementById('palette').dispatchEvent(sliderEvent);
+    };
+});
+
 Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
     td.innerText = value ?? '';
     td.style.backgroundColor = '';
@@ -30,6 +47,32 @@ Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column
     if (value === null) return;
     td.style.backgroundColor = getBgColor(value);
     td.style.color = getColor(value);
+});
+
+const colorList = Array.from({ length: COLOR_DEPTH }, (_, r) =>
+    Array.from({ length: COLOR_DEPTH }, (_, g) =>
+        Array.from({ length: COLOR_DEPTH }, (_, b) => [r, g, b].join('')),
+    ),
+);
+colorList.forEach((tbl, i) => {
+    const div = document.createElement('div');
+    div.id = 'tbl' + i;
+    document.getElementById('colors').appendChild(div);
+    // eslint-disable-next-line no-new
+    new Handsontable(div, {
+        data: tbl,
+        colWidths: 21,
+        editor: false,
+        fillHandle: false,
+        beforePaste: () => false,
+        afterOnCellMouseDown(event, coords) {
+            const rgb = this.getDataAtCell(coords.row, coords.col);
+            this.deselectCell();
+            setColorSliders(rgb);
+        },
+        renderer: 'palette',
+        licenseKey: 'non-commercial-and-evaluation',
+    });
 });
 
 const palette = new Handsontable(document.getElementById('palette'), {
@@ -49,7 +92,6 @@ const palette = new Handsontable(document.getElementById('palette'), {
     cells(row, col) {
         if (col === 0) return { readOnly: true };
     },
-    // readOnly: true,
     editor: false,
     fillHandle: false,
     afterInit() {
@@ -67,10 +109,7 @@ const palette = new Handsontable(document.getElementById('palette'), {
         });
         document.addEventListener('mousedown', (event) => {
             const target = event.target;
-            if (
-                !paletteElement.contains(target) &&
-                !colorsElement.contains(target)
-            ) {
+            if (!paletteElement.contains(target) && !colorsElement.contains(target)) {
                 this.deselectCell();
             }
         });
@@ -99,7 +138,7 @@ const palette = new Handsontable(document.getElementById('palette'), {
 const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
 
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
-    if (value === null) return;
+    if (value === null || document.querySelector('#bmp select option') === null) return;
     td.innerText = value;
     const paletteId = document.querySelector('#bmp select');
     const paletteTbl = palette.getData();
@@ -127,6 +166,14 @@ const bmp = new Handsontable(document.getElementById('bmp'), {
     renderer: 'bmp',
     licenseKey: 'non-commercial-and-evaluation',
 });
+const bmpSelect = document.createElement('select');
+Array.from({ length: 8 }, (_, i) => {
+    const option = document.createElement('option');
+    option.value = i;
+    option.innerText = 'p' + i;
+    bmpSelect.appendChild(option);
+});
+document.getElementById('bmp').appendChild(bmpSelect);
 
 palette.addHook('afterChange', () => bmp.render());
 
@@ -141,27 +188,6 @@ document.getElementById('test').onclick = () => {
 
 document.getElementById('view01').classList.add('current');
 
-const colorSliders = document.querySelectorAll('#colors > div:first-child input');
-colorSliders.forEach((colorSlider) => {
-    colorSlider.oninput = (e) => {
-        e.target.nextElementSibling.innerText = e.target.value;
-        colorSlider.parentElement.parentElement.style.background =
-            'rgb(' +
-            colorSliders[0].value * (255 / (COLOR_DEPTH - 1)) +
-            ',' +
-            colorSliders[1].value * (255 / (COLOR_DEPTH - 1)) +
-            ',' +
-            colorSliders[2].value * (255 / (COLOR_DEPTH - 1)) +
-            ')';
-        const sliderEvent = new CustomEvent('sliderChange', {
-            detail: {
-                rgb: [colorSliders[0].value, colorSliders[1].value, colorSliders[2].value].join(''),
-            },
-        });
-        document.getElementById('palette').dispatchEvent(sliderEvent);
-    };
-});
-
 const ctx01 = document.getElementById('view01').getContext('2d');
 ctx01.imageSmoothingEnabled = false;
 const imageData01 = ctx01.createImageData(8, 8);
@@ -171,34 +197,6 @@ const tempCtx01 = tempView01.getContext('2d');
 let bmp01 = Array(64)
     .fill(undefined)
     .map((r, i) => [255 - i * 3, 0, 0]);
-
-const colorList = Array.from({ length: COLOR_DEPTH }, (_, r) =>
-    Array.from({ length: COLOR_DEPTH }, (_, g) =>
-        Array.from({ length: COLOR_DEPTH }, (_, b) => [r, g, b].join('')),
-    ),
-);
-// console.log(colorList);
-colorList.forEach((tbl, i) => {
-    const div = document.createElement('div');
-    div.id = 'tbl' + i;
-    document.getElementById('colors').appendChild(div);
-    // eslint-disable-next-line no-new
-    new Handsontable(div, {
-        data: tbl,
-        colWidths: 21,
-        editor: false,
-        fillHandle: false,
-        beforePaste: () => false,
-        afterOnCellMouseDown(event, coords) {
-            const rgb = this.getDataAtCell(coords.row, coords.col);
-            // navigator.clipboard.writeText(rgb);
-            this.deselectCell();
-            setColorSliders(rgb);
-        },
-        renderer: 'palette',
-        licenseKey: 'non-commercial-and-evaluation',
-    });
-});
 
 document.getElementById('view').onclick = () => {
     bmp01.forEach((b, i) => {
