@@ -76,15 +76,32 @@ colorList.forEach((tbl, i) => {
 });
 
 const palette = new Handsontable(document.getElementById('palette'), {
-    // data: [['333']],
-    colHeaders: Array(8)
+    data: [
+        [
+            '666',
+            '200',
+            '613',
+            '412',
+            '000',
+            '653',
+            '540',
+            '633',
+            '666',
+            '655',
+            '320',
+            '013',
+            '244',
+            '355',
+        ],
+    ],
+    colHeaders: Array(16)
         .fill(undefined)
         .map((_, i) => i.toString(16).toUpperCase()),
     rowHeaders: Array(8)
         .fill(undefined)
         .map((_, i) => 'p' + i),
-    minCols: 8,
-    maxCols: 8,
+    minCols: 16,
+    maxCols: 16,
     minRows: 8,
     maxRows: 8,
     outsideClickDeselects: false,
@@ -134,16 +151,16 @@ const palette = new Handsontable(document.getElementById('palette'), {
     licenseKey: 'non-commercial-and-evaluation',
 });
 
-// const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
-const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
+const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
+// const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
 
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
     if (value === null || document.querySelector('#bmp select option') === null) return;
     td.innerText = value;
     const paletteId = document.querySelector('#bmp select');
     const paletteTbl = palette.getData();
-    const color = paletteTbl[paletteId.value][value];
-    console.log(color);
+    const colorIndex = Number.parseInt(value, 16);
+    const color = paletteTbl[paletteId.value][colorIndex];
     if (color === null) return;
     td.style.backgroundColor = getBgColor(color);
     td.style.color = getColor(color);
@@ -155,7 +172,7 @@ const bmp = new Handsontable(document.getElementById('bmp'), {
         .map(() => ['0', '0', '0', '0', '0', '0', '0', '0']),
     colWidths: 30,
     minRowHeights: 30,
-    columns: Array(8).fill({ validator: octValidator, allowInvalid: false }),
+    columns: Array(8).fill({ validator: hexValidator, allowInvalid: false }),
     autoWrapRow: true,
     autoWrapCol: true,
     beforeChange: (changes) => {
@@ -182,44 +199,90 @@ document.querySelector('#bmp select').onchange = () => bmp.render();
 document.getElementById('test').onclick = () => {
     const data = bmp.getData();
     data[2][2] = 2;
-    console.log(data);
+    // console.log(data);
     bmp.loadData(data);
 };
 
-document.getElementById('view01').classList.add('current');
+const canvasCtx = [];
+const canvasCtxTmp = [];
+const imageData = [];
 
-const ctx01 = document.getElementById('view01').getContext('2d');
-ctx01.imageSmoothingEnabled = false;
-const imageData01 = ctx01.createImageData(8, 8);
-const tempView01 = document.createElement('canvas');
-const tempCtx01 = tempView01.getContext('2d');
+function initView(rows, cols) {
+    const view = document.getElementById('viewer');
+    view.replaceChildren();
+    canvasCtx.length = 0;
+    canvasCtxTmp.length = 0;
+    imageData.length = 0;
 
-let bmp01 = Array(64)
-    .fill(undefined)
-    .map((r, i) => [255 - i * 3, 0, 0]);
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'view' + i + j;
+            // canvas.width = 80;
+            // canvas.height = 80;
+            canvas.width = 40;
+            canvas.height = 40;
+            canvas.onclick = (e) => {
+                view.querySelectorAll('canvas').forEach((canvas) =>
+                    canvas.classList.remove('current'),
+                );
+                e.currentTarget.classList.add('current');
+            };
+            view.appendChild(canvas);
+            canvasCtx.push(canvas.getContext('2d'));
+            canvasCtx[canvasCtx.length - 1].imageSmoothingEnabled = false;
+            imageData.push(canvasCtx[canvasCtx.length - 1].createImageData(8, 8));
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 8;
+            tempCanvas.height = 8;
+            canvasCtxTmp.push(tempCanvas.getContext('2d'));
+        }
+    }
+    view.querySelector('canvas')?.classList.add('current');
+}
+initView(4, 2);
+
+function readChr(base64Str) {
+    if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
+
+    const TBL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const values = [];
+    let buffer = 0;
+    let bits = 0;
+
+    for (const chr of base64Str) {
+        buffer = (buffer << 6) | TBL.indexOf(chr);
+        bits += 6;
+        while (bits >= 4) {
+            bits -= 4;
+            values.push((buffer >> bits) & 0xf);
+            buffer &= (1 << bits) - 1;
+        }
+    }
+    return values;
+}
+
+function color2rgb(color, paletteId) {
+    const paletteTbl = palette.getData();
+    const rgb = paletteTbl[paletteId][color];
+    return rgb.split('').map((v) => Math.round(v * (255 / (COLOR_DEPTH - 1))));
+}
 
 document.getElementById('view').onclick = () => {
-    bmp01.forEach((b, i) => {
-        imageData01.data[i * 4 + 0] = b[0];
-        imageData01.data[i * 4 + 1] = b[1];
-        imageData01.data[i * 4 + 2] = b[2];
-        imageData01.data[i * 4 + 3] = 255;
+    const src = document.querySelector('#source textarea').value.split(/\r\n|\n/);
+    // console.log(src);
+    src.forEach((line, i) => {
+        const bmp = readChr(line);
+        // console.log(bmp);
+        bmp.forEach((b, j) => {
+            imageData[i].data[j * 4 + 0] = color2rgb(b, 0)[0];
+            imageData[i].data[j * 4 + 1] = color2rgb(b, 0)[1];
+            imageData[i].data[j * 4 + 2] = color2rgb(b, 0)[2];
+            imageData[i].data[j * 4 + 3] = 255;
+        });
+        canvasCtxTmp[i].putImageData(imageData[i], 0, 0);
+        // canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 80, 80);
+        canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
     });
-    tempCtx01.putImageData(imageData01, 0, 0);
-    ctx01.drawImage(tempView01, 0, 0, 8, 8, 0, 0, 80, 80);
-
-    const ctx02 = document.getElementById('view02').getContext('2d');
-    ctx02.fillStyle = 'green';
-    ctx02.fillRect(0, 0, 80, 80);
-    const ctx03 = document.getElementById('view03').getContext('2d');
-    ctx03.fillStyle = 'blue';
-    ctx03.fillRect(0, 0, 80, 80);
 };
-document.querySelectorAll('#viewer canvas').forEach((canvas) => {
-    canvas.onclick = (e) => {
-        document
-            .querySelectorAll('#viewer canvas')
-            .forEach((canvas) => canvas.classList.remove('current'));
-        e.target.classList.add('current');
-    };
-});
