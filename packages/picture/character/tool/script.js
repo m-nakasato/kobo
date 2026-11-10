@@ -1,23 +1,71 @@
-const COLOR_DEPTH = 7;
+const COLOR_DEPTH = 16;
+
+function hsv2Rgb(h, s, v) {
+    // console.log(h, s, v);
+    const hue = h / COLOR_DEPTH + 0.02;
+    const saturation = s / (COLOR_DEPTH - 1);
+    const value = v / (COLOR_DEPTH - 1);
+
+    let r, g, b;
+    const i = Math.floor(hue * 6);
+    const f = hue * 6 - i;
+    const p = value * (1 - saturation);
+    const q = value * (1 - f * saturation);
+    const t = value * (1 - (1 - f) * saturation);
+
+    if (i % 6 === 0) {
+        r = value;
+        g = t;
+        b = p;
+    } else if (i % 6 === 1) {
+        r = q;
+        g = value;
+        b = p;
+    } else if (i % 6 === 2) {
+        r = p;
+        g = value;
+        b = t;
+    } else if (i % 6 === 3) {
+        r = p;
+        g = q;
+        b = value;
+    } else if (i % 6 === 4) {
+        r = t;
+        g = p;
+        b = value;
+    } else {
+        r = value;
+        g = p;
+        b = q;
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function dec2hex(dec) {
+    return dec.toString(16).toUpperCase().padStart(2, '0');
+}
 
 function getBgColor(value) {
-    function hex(base7) {
-        return Math.round(base7 * (255 / (COLOR_DEPTH - 1)))
-            .toString(16)
-            .toUpperCase()
-            .padStart(2, '0');
-    }
-    return ['#', hex(value[0]), hex(value[1]), hex(value[2])].join('');
+    // function hex(base7) {
+    //     return Math.round(base7 * (255 / (COLOR_DEPTH - 1)))
+    //         .toString(16)
+    //         .toUpperCase()
+    //         .padStart(2, '0');
+    // }
+    // return ['#', hex(value[0]), hex(value[1]), hex(value[2])].join('');
+    const rgb = hsv2Rgb(parseInt(value[0], 16), parseInt(value[1], 16), parseInt(value[2], 16));
+    // console.log(rgb);
+    return '#' + dec2hex(rgb[0]) + dec2hex(rgb[1]) + dec2hex(rgb[2]);
 }
 
 function getColor(value) {
     return value[1] < Math.round(COLOR_DEPTH / 2) ? 'white' : 'black';
 }
 
-function setColorSliders(rgb) {
+function setColorSliders(hsv) {
     const e = new Event('input', { bubbles: true });
     document.querySelectorAll('#colors > div:first-child input').forEach((colorSlider, i) => {
-        colorSlider.value = rgb[i];
+        colorSlider.value = parseInt(hsv[i], 16);
         colorSlider.dispatchEvent(e);
     });
 }
@@ -26,74 +74,82 @@ setColorSliders('000');
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
 colorSliders.forEach((colorSlider) => {
     colorSlider.oninput = (e) => {
-        e.target.nextElementSibling.innerText = e.target.value;
-        const rgb = Array.from(colorSliders, ({ value }) => value * (255 / (COLOR_DEPTH - 1))).join(
-            ',',
-        );
-        colorSlider.parentElement.parentElement.style.background = `rgb(${rgb})`;
+        e.target.nextElementSibling.innerText = Number(e.target.value).toString(16).toUpperCase();
+        // const hsv = Array.from(colorSliders, ({ value }) => value * (255 / (COLOR_DEPTH - 1)));
+        const hsv = Array.from(colorSliders, ({ value }) => value);
+        // console.log(hsv);
+        // console.log('rgb(' + hsv2Rgb(...hsv).join(',') + ')');
+        colorSlider.parentElement.parentElement.style.background =
+            'rgb(' + hsv2Rgb(...hsv).join(',') + ')';
         const sliderEvent = new CustomEvent('sliderChange', {
             detail: {
-                rgb: [colorSliders[0].value, colorSliders[1].value, colorSliders[2].value].join(''),
+                hsv: [
+                    Number(colorSliders[0].value).toString(16).toUpperCase(),
+                    Number(colorSliders[1].value).toString(16).toUpperCase(),
+                    Number(colorSliders[2].value).toString(16).toUpperCase(),
+                ].join(''),
             },
         });
         document.getElementById('palette').dispatchEvent(sliderEvent);
     };
 });
 
-Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
-    td.innerText = value ?? '';
-    td.style.backgroundColor = '';
-    td.style.color = '';
-    if (value === null) return;
-    td.style.backgroundColor = getBgColor(value);
-    td.style.color = getColor(value);
+const subRenderer = (td, value) => {
+    if (value === null) {
+        td.style.backgroundColor = '';
+    } else {
+        td.style.backgroundColor = getBgColor(value);
+    }
+};
+
+Handsontable.renderers.registerRenderer('colors', (hotInstance, td, row, column, prop, value) => {
+    subRenderer(td, value);
 });
 
-const colorList = Array.from({ length: COLOR_DEPTH }, (_, r) =>
-    Array.from({ length: COLOR_DEPTH }, (_, g) =>
-        Array.from({ length: COLOR_DEPTH }, (_, b) => [r, g, b].join('')),
+// const colorList = Array.from({ length: COLOR_DEPTH }, (_, r) =>
+//     Array.from({ length: COLOR_DEPTH }, (_, g) =>
+//         Array.from({ length: COLOR_DEPTH }, (_, b) => [r, g, b].join('')),
+//     ),
+// );
+const colorList = Array.from({ length: COLOR_DEPTH }, (_, h) =>
+    Array.from({ length: COLOR_DEPTH }, (_, s) =>
+        Array.from({ length: COLOR_DEPTH }, (_, v) =>
+            [h.toString(16), s.toString(16), v.toString(16)].join(''),
+        ),
     ),
 );
 colorList.forEach((tbl, i) => {
     const div = document.createElement('div');
     div.id = 'tbl' + i;
-    document.getElementById('colors').appendChild(div);
+    document.querySelector('#colors > div:last-child').appendChild(div);
     // eslint-disable-next-line no-new
     new Handsontable(div, {
         data: tbl,
-        colWidths: 21,
+        colWidths: 6,
         editor: false,
         fillHandle: false,
         beforePaste: () => false,
         afterOnCellMouseDown(event, coords) {
-            const rgb = this.getDataAtCell(coords.row, coords.col);
+            const hsv = this.getDataAtCell(coords.row, coords.col);
             this.deselectCell();
-            setColorSliders(rgb);
+            setColorSliders(hsv);
         },
-        renderer: 'palette',
+        renderer: 'colors',
         licenseKey: 'non-commercial-and-evaluation',
     });
 });
 
+Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
+    td.innerText = value ?? '';
+    subRenderer(td, value);
+    // td.style.backgroundColor = '';
+    // td.style.color = '';
+    // if (value === null) return;
+    // td.style.backgroundColor = getBgColor(value);
+    // td.style.color = getColor(value);
+});
+
 const palette = new Handsontable(document.getElementById('palette'), {
-    data: [
-        [
-            '666',
-            '200',
-            '613',
-            '412',
-            '000',
-            '653',
-            '540',
-            '633',
-            '666',
-            '655',
-            '320',
-            '013',
-            '244',
-            '355',
-        ],
-    ],
     colHeaders: Array(16)
         .fill(undefined)
         .map((_, i) => i.toString(16).toUpperCase()),
@@ -118,9 +174,9 @@ const palette = new Handsontable(document.getElementById('palette'), {
             const selection = this.getSelected();
             if (selection && selection.length > 0) {
                 const [activeRow, activeCol] = selection[0];
-                const nerRgbStr = e.detail.rgb;
-                if (activeCol !== 0 && this.getDataAtCell(activeRow, activeCol) != nerRgbStr) {
-                    this.setDataAtCell(activeRow, activeCol, nerRgbStr);
+                const hsvStr = e.detail.hsv;
+                if (activeCol !== 0 && this.getDataAtCell(activeRow, activeCol) != hsvStr) {
+                    this.setDataAtCell(activeRow, activeCol, hsvStr);
                 }
             }
         });
@@ -263,22 +319,27 @@ function readChr(base64Str) {
     return values;
 }
 
-function color2rgb(color, paletteId) {
+function color2hsv(color, paletteId) {
     const paletteTbl = palette.getData();
-    const rgb = paletteTbl[paletteId][color];
-    return rgb.split('').map((v) => Math.round(v * (255 / (COLOR_DEPTH - 1))));
+    // console.log(paletteTbl);
+    return paletteTbl[paletteId][color].split('');
 }
 
 document.getElementById('view').onclick = () => {
-    const src = document.querySelector('#source textarea').value.split(/\r\n|\n/);
+    const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
     // console.log(src);
     src.forEach((line, i) => {
         const bmp = readChr(line);
         // console.log(bmp);
         bmp.forEach((b, j) => {
-            imageData[i].data[j * 4 + 0] = color2rgb(b, 0)[0];
-            imageData[i].data[j * 4 + 1] = color2rgb(b, 0)[1];
-            imageData[i].data[j * 4 + 2] = color2rgb(b, 0)[2];
+            if (b === 0) return;
+            const hsv = color2hsv(b, 0);
+            // console.log(hsv);
+            const rgb = hsv2Rgb(parseInt(hsv[0], 16), parseInt(hsv[1], 16), parseInt(hsv[2], 16));
+            // console.log(rgb);
+            imageData[i].data[j * 4 + 0] = rgb[0];
+            imageData[i].data[j * 4 + 1] = rgb[1];
+            imageData[i].data[j * 4 + 2] = rgb[2];
             imageData[i].data[j * 4 + 3] = 255;
         });
         canvasCtxTmp[i].putImageData(imageData[i], 0, 0);
@@ -286,3 +347,18 @@ document.getElementById('view').onclick = () => {
         canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
     });
 };
+
+document.querySelector('#source .palette textarea').oninput = (e) => {
+    const paletteTbl = e.target.value.split(/\r\n|\n/).map((line) => {
+        const cells = line.match(/.{3}/g);
+        if (cells !== null) {
+            cells.unshift(null);
+            return cells;
+        }
+    });
+    // console.log(paletteTbl);
+    palette.loadData(paletteTbl);
+};
+document
+    .querySelector('#source .palette textarea')
+    .dispatchEvent(new Event('input', { bubbles: true }));

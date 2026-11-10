@@ -7,6 +7,17 @@
         <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
         <script src="./script.js" defer></script>
         <style>
+            h2,
+            h3 {
+                font-family: system-ui;
+            }
+            h2 {
+                margin-bottom: 0.25em;
+            }
+            h3 {
+                margin: 0 0;
+                /* font-weight: normal; */
+            }
             #colors {
                 /* border: 1px solid blue; */
                 width: min-content;
@@ -14,15 +25,11 @@
                 align-items: flex-start;
                 margin-bottom: 10px;
             }
-            #colors > div {
-                flex: 1;
-                min-width: 147px;
-            }
             #colors > div:first-child {
-                height: 126px;
-                min-width: 126px;
+                height: 175px;
+                width: 175px;
+                margin-right: 5px;
                 padding: 10px;
-                border: 1px solid black;
                 background: black;
             }
             #colors > div:first-child div {
@@ -37,7 +44,13 @@
                 line-height: 14px;
             }
             #colors > div:first-child input {
-                width: 100px;
+                width: 100%;
+            }
+            #colors > div:last-child {
+                width: min-content;
+                display: grid;
+                grid-template-columns: repeat(8, 100px);
+                grid-template-rows: repeat(2, 100px);
             }
             #editor {
                 /* border: 1px solid green; */
@@ -57,6 +70,7 @@
                 border-right: 1px solid black;
                 width: fit-content;
                 padding: 0 1px 1px 0;
+                background: skyblue;
             }
             canvas {
                 display: block;
@@ -77,47 +91,55 @@
             #colors .handsontable td {
                 font-size: 10px;
                 padding: 0;
-                line-height: 20px;
-                height: 20px;
+                line-height: 5px;
+                height: 5px;
+                border: none !important;
             }
             #colors .handsontable .wtHider,
             #colors .handsontable .wtSpreader {
-                height: 147px !important;
+                height: fit-content !important;
             }
         </style>
     </head>
     <body>
-        color picker
+        <h2>Editor</h2>
+        <h3>Color Picker</h3>
         <div id="colors">
             <div>
                 <div>
-                    <span>R</span>
-                    <input type="range" min="0" max="6" value="0" />
+                    <span>H</span>
+                    <input type="range" min="0" max="15" value="0" />
                     <span>0</span>
                 </div>
                 <div>
-                    <span>G</span>
-                    <input type="range" min="0" max="6" value="0" />
+                    <span>S</span>
+                    <input type="range" min="0" max="15" value="0" />
                     <span>0</span>
                 </div>
                 <div>
-                    <span>B</span>
-                    <input type="range" min="0" max="6" value="0" />
+                    <span>V</span>
+                    <input type="range" min="0" max="15" value="0" />
                     <span>0</span>
                 </div>
             </div>
+            <div></div>
         </div>
         <div id="editor">
-            <div id="bmp">bitmap</div>
-            <div id="palette">palette</div>
+            <div id="bmp"><h3>Bitmap</h3></div>
+            <div id="palette"><h3>Palette</h3></div>
         </div>
-        viewer
+        <h2>Viewer</h2>
         <div id="viewer"></div>
         <input type="button" value="test" id="test" />
         <input type="button" value="view" id="view" />
+        <h2>Source</h2>
         <div id="source">
-            source
-            <div>
+            <div class="palette">
+                <h3>Palette</h3>
+                <textarea rows="10" cols="50">200613412000653540633666655320013244355</textarea>
+            </div>
+            <div class="chr">
+                <h3>Character</h3>
                 <textarea rows="10" cols="50">
 AAAAAAAAAAAAAAAAAAAAAAAAAAEAAAESAAASIwABIzQ
 AAAAAAAAAAAAAAAAAAAAABERAAAlIhAAZYMQAERERAA
@@ -127,6 +149,10 @@ AER3mQAEd3cAAEMxAAEiEwATIioAEzIqALEzIgC7EzE
 REREAHd3oAAaqgAAqIigAIiIigCIiIoAqIigABqqAAA
 ALyxEQC8zN0AC8zNAAvMzAAAu7sAAKqqAABKqgAAREQ
 3dywAN3csADbywAAy8sAALuwAACkpAAApUVAAEREQAA</textarea>
+            </div>
+            <div>
+                <h3>Sprite</h3>
+                <textarea rows="10" cols="50"></textarea>
             </div>
         </div>
     </body>
