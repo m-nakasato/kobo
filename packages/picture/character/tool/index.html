@@ -70,7 +70,14 @@
                 border-right: 1px solid black;
                 width: fit-content;
                 padding: 0 1px 1px 0;
-                background: skyblue;
+                background-color: #fff;
+                background-image:
+                    linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%),
+                    linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%);
+                background-position:
+                    0 0,
+                    5px 5px;
+                background-size: 10px 10px;
             }
             canvas {
                 display: block;
@@ -98,6 +105,16 @@
             #colors .handsontable .wtHider,
             #colors .handsontable .wtSpreader {
                 height: fit-content !important;
+            }
+            #source {
+                /* border: 1px solid blue; */
+                width: min-content;
+                display: flex;
+                align-items: flex-start;
+            }
+            #source > div {
+                /* flex: 1; */
+                margin: 0 10px 10px 0;
             }
         </style>
     </head>
@@ -131,7 +148,6 @@
         <h2>Viewer</h2>
         <div id="viewer"></div>
         <input type="button" value="test" id="test" />
-        <input type="button" value="view" id="view" />
         <h2>Source</h2>
         <div id="source">
             <div class="palette">
@@ -150,7 +166,7 @@ REREAHd3oAAaqgAAqIigAIiIigCIiIoAqIigABqqAAA
 ALyxEQC8zN0AC8zNAAvMzAAAu7sAAKqqAABKqgAAREQ
 3dywAN3csADbywAAy8sAALuwAACkpAAApUVAAEREQAA</textarea>
             </div>
-            <div>
+            <div class="sprite">
                 <h3>Sprite</h3>
                 <textarea rows="10" cols="50"></textarea>
             </div>

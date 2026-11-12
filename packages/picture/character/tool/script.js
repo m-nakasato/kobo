@@ -46,15 +46,7 @@ function dec2hex(dec) {
 }
 
 function getBgColor(value) {
-    // function hex(base7) {
-    //     return Math.round(base7 * (255 / (COLOR_DEPTH - 1)))
-    //         .toString(16)
-    //         .toUpperCase()
-    //         .padStart(2, '0');
-    // }
-    // return ['#', hex(value[0]), hex(value[1]), hex(value[2])].join('');
     const rgb = hsv2Rgb(parseInt(value[0], 16), parseInt(value[1], 16), parseInt(value[2], 16));
-    // console.log(rgb);
     return '#' + dec2hex(rgb[0]) + dec2hex(rgb[1]) + dec2hex(rgb[2]);
 }
 
@@ -75,10 +67,7 @@ const colorSliders = document.querySelectorAll('#colors > div:first-child input'
 colorSliders.forEach((colorSlider) => {
     colorSlider.oninput = (e) => {
         e.target.nextElementSibling.innerText = Number(e.target.value).toString(16).toUpperCase();
-        // const hsv = Array.from(colorSliders, ({ value }) => value * (255 / (COLOR_DEPTH - 1)));
         const hsv = Array.from(colorSliders, ({ value }) => value);
-        // console.log(hsv);
-        // console.log('rgb(' + hsv2Rgb(...hsv).join(',') + ')');
         colorSlider.parentElement.parentElement.style.background =
             'rgb(' + hsv2Rgb(...hsv).join(',') + ')';
         const sliderEvent = new CustomEvent('sliderChange', {
@@ -106,11 +95,6 @@ Handsontable.renderers.registerRenderer('colors', (hotInstance, td, row, column,
     subRenderer(td, value);
 });
 
-// const colorList = Array.from({ length: COLOR_DEPTH }, (_, r) =>
-//     Array.from({ length: COLOR_DEPTH }, (_, g) =>
-//         Array.from({ length: COLOR_DEPTH }, (_, b) => [r, g, b].join('')),
-//     ),
-// );
 const colorList = Array.from({ length: COLOR_DEPTH }, (_, h) =>
     Array.from({ length: COLOR_DEPTH }, (_, s) =>
         Array.from({ length: COLOR_DEPTH }, (_, v) =>
@@ -142,11 +126,6 @@ colorList.forEach((tbl, i) => {
 Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column, prop, value) => {
     td.innerText = value ?? '';
     subRenderer(td, value);
-    // td.style.backgroundColor = '';
-    // td.style.color = '';
-    // if (value === null) return;
-    // td.style.backgroundColor = getBgColor(value);
-    // td.style.color = getColor(value);
 });
 
 const palette = new Handsontable(document.getElementById('palette'), {
@@ -177,6 +156,10 @@ const palette = new Handsontable(document.getElementById('palette'), {
                 const hsvStr = e.detail.hsv;
                 if (activeCol !== 0 && this.getDataAtCell(activeRow, activeCol) != hsvStr) {
                     this.setDataAtCell(activeRow, activeCol, hsvStr);
+                    const source = this.getData()
+                        .map((row) => row.join(''))
+                        .join('\n');
+                    document.querySelector('#source .palette textarea').value = source;
                 }
             }
         });
@@ -200,8 +183,8 @@ const palette = new Handsontable(document.getElementById('palette'), {
         }
     },
     afterSelectionEnd(row, col) {
-        let rgb = this.getDataAtCell(row, col);
-        if (rgb !== null) setColorSliders(rgb);
+        let hsv = this.getDataAtCell(row, col);
+        if (hsv !== null) setColorSliders(hsv);
     },
     renderer: 'palette',
     licenseKey: 'non-commercial-and-evaluation',
@@ -283,6 +266,7 @@ function initView(rows, cols) {
                     canvas.classList.remove('current'),
                 );
                 e.currentTarget.classList.add('current');
+                console.log(i * cols + (j % cols)); // TODO: BMPにロード
             };
             view.appendChild(canvas);
             canvasCtx.push(canvas.getContext('2d'));
@@ -325,8 +309,24 @@ function color2hsv(color, paletteId) {
     return paletteTbl[paletteId][color].split('');
 }
 
-document.getElementById('view').onclick = () => {
-    const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
+document.querySelector('#source .palette textarea').oninput = (e) => {
+    const paletteTbl = e.target.value.split(/\r\n|\n/).map((line) => {
+        const cells = line.match(/.{3}/g);
+        if (cells !== null) {
+            cells.unshift(null);
+            return cells;
+        }
+    });
+    // console.log(paletteTbl);
+    palette.loadData(paletteTbl);
+};
+document
+    .querySelector('#source .palette textarea')
+    .dispatchEvent(new Event('input', { bubbles: true }));
+
+document.querySelector('#source .chr textarea').oninput = (e) => {
+    initView(4, 2);
+    const src = e.target.value.split(/\r\n|\n/);
     // console.log(src);
     src.forEach((line, i) => {
         const bmp = readChr(line);
@@ -347,18 +347,6 @@ document.getElementById('view').onclick = () => {
         canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
     });
 };
-
-document.querySelector('#source .palette textarea').oninput = (e) => {
-    const paletteTbl = e.target.value.split(/\r\n|\n/).map((line) => {
-        const cells = line.match(/.{3}/g);
-        if (cells !== null) {
-            cells.unshift(null);
-            return cells;
-        }
-    });
-    // console.log(paletteTbl);
-    palette.loadData(paletteTbl);
-};
 document
-    .querySelector('#source .palette textarea')
+    .querySelector('#source .chr textarea')
     .dispatchEvent(new Event('input', { bubbles: true }));
