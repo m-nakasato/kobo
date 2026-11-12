@@ -242,6 +242,26 @@ document.getElementById('test').onclick = () => {
     bmp.loadData(data);
 };
 
+function readChr(base64Str) {
+    if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
+
+    const TBL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const values = [];
+    let buffer = 0;
+    let bits = 0;
+
+    for (const chr of base64Str) {
+        buffer = (buffer << 6) | TBL.indexOf(chr);
+        bits += 6;
+        while (bits >= 4) {
+            bits -= 4;
+            values.push((buffer >> bits) & 0xf);
+            buffer &= (1 << bits) - 1;
+        }
+    }
+    return values;
+}
+
 const canvasCtx = [];
 const canvasCtxTmp = [];
 const imageData = [];
@@ -266,7 +286,11 @@ function initView(rows, cols) {
                     canvas.classList.remove('current'),
                 );
                 e.currentTarget.classList.add('current');
-                console.log(i * cols + (j % cols)); // TODO: BMPにロード
+                // console.log(i * cols + (j % cols)); // TODO: BMPにロード
+                const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
+                // console.log(src[i * cols + (j % cols)]);
+                const bmp = readChr(src[i * cols + (j % cols)]);
+                console.log(bmp);
             };
             view.appendChild(canvas);
             canvasCtx.push(canvas.getContext('2d'));
@@ -279,28 +303,9 @@ function initView(rows, cols) {
             canvasCtxTmp.push(tempCanvas.getContext('2d'));
         }
     }
-    view.querySelector('canvas')?.classList.add('current');
-}
-initView(4, 2);
-
-function readChr(base64Str) {
-    if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
-
-    const TBL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    const values = [];
-    let buffer = 0;
-    let bits = 0;
-
-    for (const chr of base64Str) {
-        buffer = (buffer << 6) | TBL.indexOf(chr);
-        bits += 6;
-        while (bits >= 4) {
-            bits -= 4;
-            values.push((buffer >> bits) & 0xf);
-            buffer &= (1 << bits) - 1;
-        }
-    }
-    return values;
+    view.querySelector('canvas')?.dispatchEvent(
+        new Event('click', { bubbles: true, cancelable: true }),
+    );
 }
 
 function color2hsv(color, paletteId) {
@@ -325,7 +330,7 @@ document
     .dispatchEvent(new Event('input', { bubbles: true }));
 
 document.querySelector('#source .chr textarea').oninput = (e) => {
-    initView(4, 2);
+    initView(4, 2); // TODO: BMPの行数と列数を取得して反映する
     const src = e.target.value.split(/\r\n|\n/);
     // console.log(src);
     src.forEach((line, i) => {
