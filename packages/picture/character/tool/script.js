@@ -60,8 +60,11 @@ function setColorSliders(hsv) {
         colorSlider.value = parseInt(hsv[i], 16);
         colorSlider.dispatchEvent(e);
     });
+    document
+        .querySelector('#source .chr textarea')
+        .dispatchEvent(new Event('input', { bubbles: true }));
 }
-setColorSliders('000');
+// setColorSliders('000');
 
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
 colorSliders.forEach((colorSlider) => {
@@ -79,7 +82,7 @@ colorSliders.forEach((colorSlider) => {
                 ].join(''),
             },
         });
-        document.getElementById('palette').dispatchEvent(sliderEvent);
+        document.querySelector('#editor .palette').dispatchEvent(sliderEvent);
     };
 });
 
@@ -128,7 +131,7 @@ Handsontable.renderers.registerRenderer('palette', (hotInstance, td, row, column
     subRenderer(td, value);
 });
 
-const palette = new Handsontable(document.getElementById('palette'), {
+const palette = new Handsontable(document.querySelector('#editor .palette'), {
     colHeaders: Array(16)
         .fill(undefined)
         .map((_, i) => i.toString(16).toUpperCase()),
@@ -147,7 +150,7 @@ const palette = new Handsontable(document.getElementById('palette'), {
     editor: false,
     fillHandle: false,
     afterInit() {
-        const paletteElement = document.getElementById('palette');
+        const paletteElement = document.querySelector('#editor .palette');
         const colorsElement = document.getElementById('colors');
         paletteElement.addEventListener('sliderChange', (e) => {
             const selection = this.getSelected();
@@ -194,9 +197,9 @@ const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
 // const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
 
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
-    if (value === null || document.querySelector('#bmp select option') === null) return;
+    if (value === null || document.querySelector('#editor .bmp select option') === null) return;
     td.innerText = value;
-    const paletteId = document.querySelector('#bmp select');
+    const paletteId = document.querySelector('#editor .bmp select');
     const paletteTbl = palette.getData();
     const colorIndex = Number.parseInt(value, 16);
     const color = paletteTbl[paletteId.value][colorIndex];
@@ -205,7 +208,7 @@ Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, pr
     td.style.color = getColor(color);
 });
 
-const bmp = new Handsontable(document.getElementById('bmp'), {
+const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
     data: Array(8)
         .fill(undefined)
         .map(() => ['0', '0', '0', '0', '0', '0', '0', '0']),
@@ -219,6 +222,13 @@ const bmp = new Handsontable(document.getElementById('bmp'), {
             (change) => (change[3] = change[3].replace(/[a-f]/g, (match) => match.toUpperCase())),
         );
     },
+    afterChange(changes) {
+        if (changes) {
+            const data = this.getData().flat();
+            // document.querySelector('#source .chr textarea').value = writeChr(data);
+        }
+    },
+    // outsideClickDeselects: false,
     renderer: 'bmp',
     licenseKey: 'non-commercial-and-evaluation',
 });
@@ -229,11 +239,11 @@ Array.from({ length: 8 }, (_, i) => {
     option.innerText = 'p' + i;
     bmpSelect.appendChild(option);
 });
-document.getElementById('bmp').appendChild(bmpSelect);
+document.querySelector('#editor .bmp').appendChild(bmpSelect);
 
 palette.addHook('afterChange', () => bmp.render());
 
-document.querySelector('#bmp select').onchange = () => bmp.render();
+document.querySelector('#editor .bmp select').onchange = () => bmp.render();
 
 document.getElementById('test').onclick = () => {
     const data = bmp.getData();
@@ -245,21 +255,30 @@ document.getElementById('test').onclick = () => {
 function readChr(base64Str) {
     if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
 
-    const TBL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const bytes = Uint8Array.fromBase64(base64Str, {
+        lastChunkHandling: 'loose',
+    });
     const values = [];
-    let buffer = 0;
-    let bits = 0;
 
-    for (const chr of base64Str) {
-        buffer = (buffer << 6) | TBL.indexOf(chr);
-        bits += 6;
-        while (bits >= 4) {
-            bits -= 4;
-            values.push((buffer >> bits) & 0xf);
-            buffer &= (1 << bits) - 1;
-        }
+    for (const byte of bytes) {
+        values.push(byte >> 4, byte & 0x0f);
     }
     return values;
+}
+
+function writeChr(bmp) {
+    const pixels = bmp.join('');
+    if (!/^[0-9A-F]{64}$/.test(pixels)) {
+        throw new Error('Expected 64 hexadecimal pixel values');
+    }
+
+    const bytes = new Uint8Array(32);
+    for (let i = 0; i < bytes.length; i++) {
+        const p = i * 2;
+        bytes[i] = Number.parseInt(pixels.slice(p, p + 2), 16);
+    }
+
+    return bytes.toBase64({ omitPadding: true });
 }
 
 const canvasCtx = [];
@@ -289,8 +308,15 @@ function initView(rows, cols) {
                 // console.log(i * cols + (j % cols)); // TODO: BMPにロード
                 const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
                 // console.log(src[i * cols + (j % cols)]);
-                const bmp = readChr(src[i * cols + (j % cols)]);
-                console.log(bmp);
+                const pixels = readChr(src[i * cols + (j % cols)]);
+                // console.log(pixels);
+                const data = Array.from({ length: 8 }, (_, row) =>
+                    pixels
+                        .slice(row * 8, (row + 1) * 8)
+                        .map((value) => value.toString(16).toUpperCase()),
+                );
+                // console.log(data);
+                bmp.loadData(data);
             };
             view.appendChild(canvas);
             canvasCtx.push(canvas.getContext('2d'));
