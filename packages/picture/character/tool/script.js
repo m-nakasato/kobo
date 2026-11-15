@@ -176,13 +176,42 @@ const palette = new Handsontable(document.querySelector('#editor .palette'), {
         let hsv = this.getDataAtCell(row, col);
         if (hsv !== null) setColorSliders(hsv);
     },
-    // Add an 'afterChange' hook later.
+    // An "afterChange" hook is added after the "bmp" and "renderViewer" definitions.
     renderer: 'palette',
     licenseKey: 'non-commercial-and-evaluation',
 });
 
 const hexValidator = (value, callback) => callback(/^[0-9A-F]$/.test(value));
 // const octValidator = (value, callback) => callback(/^[0-7]$/.test(value));
+
+function readChr(base64Str) {
+    if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
+
+    const bytes = Uint8Array.fromBase64(base64Str, {
+        lastChunkHandling: 'loose',
+    });
+    const values = [];
+
+    for (const byte of bytes) {
+        values.push(byte >> 4, byte & 0x0f);
+    }
+    return values;
+}
+
+function writeChr(data) {
+    const pixels = data.join('');
+    if (!/^[0-9A-F]{64}$/.test(pixels)) {
+        throw new Error('Expected 64 hexadecimal pixel values');
+    }
+
+    const bytes = new Uint8Array(32);
+    for (let i = 0; i < bytes.length; i++) {
+        const p = i * 2;
+        bytes[i] = Number.parseInt(pixels.slice(p, p + 2), 16);
+    }
+
+    return bytes.toBase64({ omitPadding: true });
+}
 
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
     if (value === null || document.querySelector('#editor .bmp select option') === null) return;
@@ -197,9 +226,9 @@ Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, pr
 });
 
 const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
-    data: Array(8)
-        .fill(undefined)
-        .map(() => ['0', '0', '0', '0', '0', '0', '0', '0']),
+    // data: Array(8)
+    //     .fill(undefined)
+    //     .map(() => ['0', '0', '0', '0', '0', '0', '0', '0']),
     colWidths: 30,
     minRowHeights: 30,
     columns: Array(8).fill({ validator: hexValidator, allowInvalid: false }),
@@ -213,16 +242,12 @@ const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
             (change) => (change[3] = change[3].replace(/[a-f]/g, (match) => match.toUpperCase())),
         );
     },
-    afterChange(changes) {
-        if (changes) {
-            // const data = this.getData().flat();
-            // document.querySelector('#source .chr textarea').value = writeChr(data);
-        }
-    },
+    // The "afterChange" hook is added after the "bmp" and "renderViewer" definitions.
     outsideClickDeselects: false,
     renderer: 'bmp',
     licenseKey: 'non-commercial-and-evaluation',
 });
+
 const bmpSelect = document.createElement('select');
 Array.from({ length: 8 }, (_, i) => {
     const option = document.createElement('option');
@@ -240,35 +265,6 @@ document.getElementById('test').onclick = () => {
     // console.log(data);
     bmp.loadData(data);
 };
-
-function readChr(base64Str) {
-    if (/[^A-Za-z0-9+/]/.test(base64Str)) throw new Error('Invalid Base64 character data');
-
-    const bytes = Uint8Array.fromBase64(base64Str, {
-        lastChunkHandling: 'loose',
-    });
-    const values = [];
-
-    for (const byte of bytes) {
-        values.push(byte >> 4, byte & 0x0f);
-    }
-    return values;
-}
-
-// function writeChr(bmp) {
-//     const pixels = bmp.join('');
-//     if (!/^[0-9A-F]{64}$/.test(pixels)) {
-//         throw new Error('Expected 64 hexadecimal pixel values');
-//     }
-
-//     const bytes = new Uint8Array(32);
-//     for (let i = 0; i < bytes.length; i++) {
-//         const p = i * 2;
-//         bytes[i] = Number.parseInt(pixels.slice(p, p + 2), 16);
-//     }
-
-//     return bytes.toBase64({ omitPadding: true });
-// }
 
 const canvasCtx = [];
 const canvasCtxTmp = [];
@@ -352,6 +348,19 @@ function renderViewer() {
         canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
     });
 }
+
+bmp.addHook('afterChange', (changes) => {
+    if (changes) {
+        const data = bmp.getData().flat();
+        const src = document.querySelector('#source .chr textarea');
+        const lines = src.value.split(/\r\n|\n/);
+        const viewId = document.querySelector('#viewer canvas.current')?.id;
+        const index = viewId ? Number(viewId.slice(-2, -1)) * 2 + Number(viewId.slice(-1)) : 0;
+        lines[index] = writeChr(data);
+        src.value = lines.join('\n');
+        renderViewer();
+    }
+});
 
 palette.addHook('afterChange', () => {
     bmp.render();
