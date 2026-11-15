@@ -151,7 +151,7 @@ const palette = new Handsontable(document.querySelector('#editor .palette'), {
     fillHandle: false,
     afterInit() {
         const paletteElement = document.querySelector('#editor .palette');
-        const colorsElement = document.getElementById('colors');
+        // const colorsElement = document.getElementById('colors');
         paletteElement.addEventListener('sliderChange', (e) => {
             const selection = this.getSelected();
             if (selection && selection.length > 0) {
@@ -166,25 +166,26 @@ const palette = new Handsontable(document.querySelector('#editor .palette'), {
                 }
             }
         });
-        document.addEventListener('mousedown', (event) => {
-            const target = event.target;
-            if (!paletteElement.contains(target) && !colorsElement.contains(target)) {
-                this.deselectCell();
-            }
-        });
+        // document.addEventListener('mousedown', (event) => {
+        //     const target = event.target;
+        //     if (!paletteElement.contains(target) && !colorsElement.contains(target)) {
+        //         this.deselectCell();
+        //     }
+        // });
+        this.selectCell(0, 1);
     },
-    beforeSetRangeStart(coords) {
-        if (coords.col === 0) {
-            this.deselectCell();
-            return false;
-        }
-    },
-    beforeSetRangeEnd(coords) {
-        if (coords.col === 0) {
-            this.deselectCell();
-            return false;
-        }
-    },
+    // beforeSetRangeStart(coords) {
+    //     if (coords.col === 0) {
+    //         // this.deselectCell();
+    //         return false;
+    //     }
+    // },
+    // beforeSetRangeEnd(coords) {
+    //     if (coords.col === 0) {
+    //         // this.deselectCell();
+    //         return false;
+    //     }
+    // },
     afterSelectionEnd(row, col) {
         let hsv = this.getDataAtCell(row, col);
         if (hsv !== null) setColorSliders(hsv);
@@ -217,6 +218,9 @@ const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
     columns: Array(8).fill({ validator: hexValidator, allowInvalid: false }),
     autoWrapRow: true,
     autoWrapCol: true,
+    afterInit() {
+        this.selectCell(0, 0);
+    },
     beforeChange: (changes) => {
         changes.forEach(
             (change) => (change[3] = change[3].replace(/[a-f]/g, (match) => match.toUpperCase())),
@@ -224,11 +228,11 @@ const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
     },
     afterChange(changes) {
         if (changes) {
-            const data = this.getData().flat();
+            // const data = this.getData().flat();
             // document.querySelector('#source .chr textarea').value = writeChr(data);
         }
     },
-    // outsideClickDeselects: false,
+    outsideClickDeselects: false,
     renderer: 'bmp',
     licenseKey: 'non-commercial-and-evaluation',
 });
@@ -266,20 +270,20 @@ function readChr(base64Str) {
     return values;
 }
 
-function writeChr(bmp) {
-    const pixels = bmp.join('');
-    if (!/^[0-9A-F]{64}$/.test(pixels)) {
-        throw new Error('Expected 64 hexadecimal pixel values');
-    }
+// function writeChr(bmp) {
+//     const pixels = bmp.join('');
+//     if (!/^[0-9A-F]{64}$/.test(pixels)) {
+//         throw new Error('Expected 64 hexadecimal pixel values');
+//     }
 
-    const bytes = new Uint8Array(32);
-    for (let i = 0; i < bytes.length; i++) {
-        const p = i * 2;
-        bytes[i] = Number.parseInt(pixels.slice(p, p + 2), 16);
-    }
+//     const bytes = new Uint8Array(32);
+//     for (let i = 0; i < bytes.length; i++) {
+//         const p = i * 2;
+//         bytes[i] = Number.parseInt(pixels.slice(p, p + 2), 16);
+//     }
 
-    return bytes.toBase64({ omitPadding: true });
-}
+//     return bytes.toBase64({ omitPadding: true });
+// }
 
 const canvasCtx = [];
 const canvasCtxTmp = [];
