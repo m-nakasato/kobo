@@ -54,35 +54,40 @@ function getColor(value) {
     return value[1] < Math.round(COLOR_DEPTH / 2) ? 'white' : 'black';
 }
 
-function setColorSliders(hsv) {
-    const e = new Event('input', { bubbles: true });
-    document.querySelectorAll('#colors > div:first-child input').forEach((colorSlider, i) => {
-        colorSlider.value = parseInt(hsv[i], 16);
-        colorSlider.dispatchEvent(e);
-    });
-    document
-        .querySelector('#source .chr textarea')
-        .dispatchEvent(new Event('input', { bubbles: true }));
-}
-// setColorSliders('000');
-
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
+
+function getColorSliderHsv() {
+    return Array.from(colorSliders, ({ value }) => Number(value).toString(16).toUpperCase()).join(
+        '',
+    );
+}
+
+function updateColorSliderDisplay() {
+    const hsv = Array.from(colorSliders, ({ value }) => Number(value));
+    colorSliders.forEach((colorSlider, i) => {
+        colorSlider.nextElementSibling.innerText = hsv[i].toString(16).toUpperCase();
+    });
+    colorSliders[0].parentElement.parentElement.style.background =
+        'rgb(' + hsv2Rgb(...hsv).join(',') + ')';
+}
+
+function setColorSliders(hsv) {
+    colorSliders.forEach((colorSlider, i) => {
+        colorSlider.value = parseInt(hsv[i], 16);
+    });
+    updateColorSliderDisplay();
+}
+
+function dispatchPaletteColorChange(hsv) {
+    document
+        .querySelector('#editor .palette')
+        .dispatchEvent(new CustomEvent('paletteColorChange', { detail: { hsv } }));
+}
+
 colorSliders.forEach((colorSlider) => {
-    colorSlider.oninput = (e) => {
-        e.target.nextElementSibling.innerText = Number(e.target.value).toString(16).toUpperCase();
-        const hsv = Array.from(colorSliders, ({ value }) => value);
-        colorSlider.parentElement.parentElement.style.background =
-            'rgb(' + hsv2Rgb(...hsv).join(',') + ')';
-        const sliderEvent = new CustomEvent('sliderChange', {
-            detail: {
-                hsv: [
-                    Number(colorSliders[0].value).toString(16).toUpperCase(),
-                    Number(colorSliders[1].value).toString(16).toUpperCase(),
-                    Number(colorSliders[2].value).toString(16).toUpperCase(),
-                ].join(''),
-            },
-        });
-        document.querySelector('#editor .palette').dispatchEvent(sliderEvent);
+    colorSlider.oninput = () => {
+        updateColorSliderDisplay();
+        dispatchPaletteColorChange(getColorSliderHsv());
     };
 });
 
@@ -120,6 +125,7 @@ colorList.forEach((tbl, i) => {
             const hsv = this.getDataAtCell(coords.row, coords.col);
             this.deselectCell();
             setColorSliders(hsv);
+            dispatchPaletteColorChange(hsv);
         },
         renderer: 'colors',
         licenseKey: 'non-commercial-and-evaluation',
@@ -150,9 +156,7 @@ const palette = new Handsontable(document.querySelector('#editor .palette'), {
     editor: false,
     fillHandle: false,
     afterInit() {
-        const paletteElement = document.querySelector('#editor .palette');
-        // const colorsElement = document.getElementById('colors');
-        paletteElement.addEventListener('sliderChange', (e) => {
+        document.querySelector('#editor .palette').addEventListener('paletteColorChange', (e) => {
             const selection = this.getSelected();
             if (selection && selection.length > 0) {
                 const [activeRow, activeCol] = selection[0];
@@ -166,30 +170,13 @@ const palette = new Handsontable(document.querySelector('#editor .palette'), {
                 }
             }
         });
-        // document.addEventListener('mousedown', (event) => {
-        //     const target = event.target;
-        //     if (!paletteElement.contains(target) && !colorsElement.contains(target)) {
-        //         this.deselectCell();
-        //     }
-        // });
         this.selectCell(0, 1);
     },
-    // beforeSetRangeStart(coords) {
-    //     if (coords.col === 0) {
-    //         // this.deselectCell();
-    //         return false;
-    //     }
-    // },
-    // beforeSetRangeEnd(coords) {
-    //     if (coords.col === 0) {
-    //         // this.deselectCell();
-    //         return false;
-    //     }
-    // },
     afterSelectionEnd(row, col) {
         let hsv = this.getDataAtCell(row, col);
         if (hsv !== null) setColorSliders(hsv);
     },
+    // Add an 'afterChange' hook later.
     renderer: 'palette',
     licenseKey: 'non-commercial-and-evaluation',
 });
@@ -245,8 +232,6 @@ Array.from({ length: 8 }, (_, i) => {
 });
 document.querySelector('#editor .bmp').appendChild(bmpSelect);
 
-palette.addHook('afterChange', () => bmp.render());
-
 document.querySelector('#editor .bmp select').onchange = () => bmp.render();
 
 document.getElementById('test').onclick = () => {
@@ -289,6 +274,15 @@ const canvasCtx = [];
 const canvasCtxTmp = [];
 const imageData = [];
 
+function loadCharacterToBmp(index) {
+    const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
+    const pixels = readChr(src[index]);
+    const data = Array.from({ length: 8 }, (_, row) =>
+        pixels.slice(row * 8, (row + 1) * 8).map((value) => value.toString(16).toUpperCase()),
+    );
+    bmp.loadData(data);
+}
+
 function initView(rows, cols) {
     const view = document.getElementById('viewer');
     view.replaceChildren();
@@ -309,18 +303,7 @@ function initView(rows, cols) {
                     canvas.classList.remove('current'),
                 );
                 e.currentTarget.classList.add('current');
-                // console.log(i * cols + (j % cols)); // TODO: BMPにロード
-                const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
-                // console.log(src[i * cols + (j % cols)]);
-                const pixels = readChr(src[i * cols + (j % cols)]);
-                // console.log(pixels);
-                const data = Array.from({ length: 8 }, (_, row) =>
-                    pixels
-                        .slice(row * 8, (row + 1) * 8)
-                        .map((value) => value.toString(16).toUpperCase()),
-                );
-                // console.log(data);
-                bmp.loadData(data);
+                loadCharacterToBmp(i * cols + j);
             };
             view.appendChild(canvas);
             canvasCtx.push(canvas.getContext('2d'));
@@ -333,9 +316,11 @@ function initView(rows, cols) {
             canvasCtxTmp.push(tempCanvas.getContext('2d'));
         }
     }
-    view.querySelector('canvas')?.dispatchEvent(
-        new Event('click', { bubbles: true, cancelable: true }),
-    );
+    const firstCanvas = view.querySelector('canvas');
+    if (firstCanvas) {
+        firstCanvas.classList.add('current');
+        loadCharacterToBmp(0);
+    }
 }
 
 function color2hsv(color, paletteId) {
@@ -343,6 +328,35 @@ function color2hsv(color, paletteId) {
     // console.log(paletteTbl);
     return paletteTbl[paletteId][color].split('');
 }
+
+function renderViewer() {
+    if (canvasCtx.length === 0) return;
+
+    const src = document.querySelector('#source .chr textarea').value.split(/\r\n|\n/);
+    src.forEach((line, i) => {
+        const pixels = readChr(line);
+        const image = imageData[i];
+        image.data.fill(0);
+
+        pixels.forEach((value, j) => {
+            if (value === 0) return;
+            const hsv = color2hsv(value, 0);
+            const rgb = hsv2Rgb(parseInt(hsv[0], 16), parseInt(hsv[1], 16), parseInt(hsv[2], 16));
+            image.data[j * 4 + 0] = rgb[0];
+            image.data[j * 4 + 1] = rgb[1];
+            image.data[j * 4 + 2] = rgb[2];
+            image.data[j * 4 + 3] = 255;
+        });
+
+        canvasCtxTmp[i].putImageData(image, 0, 0);
+        canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
+    });
+}
+
+palette.addHook('afterChange', () => {
+    bmp.render();
+    renderViewer();
+});
 
 document.querySelector('#source .palette textarea').oninput = (e) => {
     const paletteTbl = e.target.value.split(/\r\n|\n/).map((line) => {
@@ -352,35 +366,15 @@ document.querySelector('#source .palette textarea').oninput = (e) => {
             return cells;
         }
     });
-    // console.log(paletteTbl);
     palette.loadData(paletteTbl);
 };
 document
     .querySelector('#source .palette textarea')
     .dispatchEvent(new Event('input', { bubbles: true }));
 
-document.querySelector('#source .chr textarea').oninput = (e) => {
+document.querySelector('#source .chr textarea').oninput = () => {
     initView(4, 2); // TODO: BMPの行数と列数を取得して反映する
-    const src = e.target.value.split(/\r\n|\n/);
-    // console.log(src);
-    src.forEach((line, i) => {
-        const bmp = readChr(line);
-        // console.log(bmp);
-        bmp.forEach((b, j) => {
-            if (b === 0) return;
-            const hsv = color2hsv(b, 0);
-            // console.log(hsv);
-            const rgb = hsv2Rgb(parseInt(hsv[0], 16), parseInt(hsv[1], 16), parseInt(hsv[2], 16));
-            // console.log(rgb);
-            imageData[i].data[j * 4 + 0] = rgb[0];
-            imageData[i].data[j * 4 + 1] = rgb[1];
-            imageData[i].data[j * 4 + 2] = rgb[2];
-            imageData[i].data[j * 4 + 3] = 255;
-        });
-        canvasCtxTmp[i].putImageData(imageData[i], 0, 0);
-        // canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 80, 80);
-        canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
-    });
+    renderViewer();
 };
 document
     .querySelector('#source .chr textarea')
