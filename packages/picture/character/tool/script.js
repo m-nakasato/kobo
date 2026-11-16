@@ -51,7 +51,7 @@ function getBgColor(value) {
 }
 
 function getColor(value) {
-    return value[1] < Math.round(COLOR_DEPTH / 2) ? 'white' : 'black';
+    return value[2] < Math.round(COLOR_DEPTH / 2) ? 'white' : 'black';
 }
 
 const colorSliders = document.querySelectorAll('#colors > div:first-child input');
@@ -96,6 +96,7 @@ const subRenderer = (td, value) => {
         td.style.backgroundColor = '';
     } else {
         td.style.backgroundColor = getBgColor(value);
+        td.style.color = getColor(value);
     }
 };
 
@@ -216,13 +217,17 @@ function writeChr(data) {
 Handsontable.renderers.registerRenderer('bmp', (hotInstance, td, row, column, prop, value) => {
     if (value === null || document.querySelector('#editor .bmp select option') === null) return;
     td.innerText = value;
+    if (value == 0) {
+        td.classList.add('transparent');
+        td.style.color = 'black';
+        return;
+    }
     const paletteId = document.querySelector('#editor .bmp select');
     const paletteTbl = palette.getData();
     const colorIndex = Number.parseInt(value, 16);
     const color = paletteTbl[paletteId.value][colorIndex];
     if (color === null) return;
-    td.style.backgroundColor = getBgColor(color);
-    td.style.color = getColor(color);
+    subRenderer(td, color);
 });
 
 const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
