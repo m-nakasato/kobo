@@ -74,6 +74,8 @@
                 border-right: 1px solid black;
                 width: fit-content;
                 padding: 0 1px 1px 0;
+                background-repeat: no-repeat;
+                background-size: 50% 50%;
             }
             .transparent {
                 background-color: #fff !important;
@@ -83,7 +85,8 @@
                 background-position:
                     0 0,
                     5px 5px;
-                background-size: 10px 10px;
+                background-repeat: repeat !important;
+                background-size: 10px 10px !important;
             }
             canvas {
                 display: block;
@@ -151,7 +154,8 @@
         </div>
         <h2>Viewer</h2>
         <div id="viewer" class="transparent"></div>
-        <input type="button" value="test" id="test" />
+        Sample:
+        <input type="file" id="sampleImg" accept="image/*" />
         <h2>Source</h2>
         <div id="source">
             <div class="palette">

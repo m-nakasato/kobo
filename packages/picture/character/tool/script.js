@@ -264,13 +264,6 @@ document.querySelector('#editor .bmp').appendChild(bmpSelect);
 
 document.querySelector('#editor .bmp select').onchange = () => bmp.render();
 
-document.getElementById('test').onclick = () => {
-    const data = bmp.getData();
-    data[2][2] = 2;
-    // console.log(data);
-    bmp.loadData(data);
-};
-
 const canvasCtx = [];
 const canvasCtxTmp = [];
 const imageData = [];
@@ -323,6 +316,15 @@ function initView(rows, cols) {
         loadCharacterToBmp(0);
     }
 }
+
+document.querySelector('#sampleImg').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const view = document.getElementById('viewer');
+    view.classList.remove('transparent');
+    const url = URL.createObjectURL(file);
+    view.style.backgroundImage = `url(${url})`;
+};
 
 function color2hsv(color, paletteId) {
     const paletteTbl = palette.getData();
