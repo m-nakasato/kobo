@@ -243,9 +243,9 @@ const bmp = new Handsontable(document.querySelector('#editor .bmp'), {
         this.selectCell(0, 0);
     },
     beforeChange: (changes) => {
-        changes.forEach(
-            (change) => (change[3] = change[3].replace(/[a-f]/g, (match) => match.toUpperCase())),
-        );
+        changes.forEach((change) => {
+            change[3] = change[3]?.replace(/[a-f]/g, (match) => match.toUpperCase());
+        });
     },
     // The "afterChange" hook is added after the "bmp" and "renderViewer" definitions.
     outsideClickDeselects: false,
@@ -352,6 +352,7 @@ function renderViewer() {
         });
 
         canvasCtxTmp[i].putImageData(image, 0, 0);
+        canvasCtx[i].clearRect(0, 0, 40, 40);
         canvasCtx[i].drawImage(canvasCtxTmp[i].canvas, 0, 0, 8, 8, 0, 0, 40, 40);
     });
 }
