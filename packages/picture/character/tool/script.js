@@ -324,6 +324,32 @@ document.querySelector('#sampleImg').onchange = (e) => {
     view.classList.remove('transparent');
     const url = URL.createObjectURL(file);
     view.style.backgroundImage = `url(${url})`;
+    const w = document.querySelector('#sampleSetting .w');
+    const h = document.querySelector('#sampleSetting .h');
+    view.style.backgroundSize = `${w.value}% ${h.value}%`;
+    const x = document.querySelector('#sampleSetting .x');
+    const y = document.querySelector('#sampleSetting .y');
+    view.style.backgroundPosition = `${x.value}px ${y.value}px`;
+};
+
+document
+    .querySelectorAll('#sampleSetting .w, #sampleSetting .h, #sampleSetting .x, #sampleSetting .y')
+    .forEach((input) => {
+        input.oninput = () => {
+            const w = document.querySelector('#sampleSetting .w');
+            const h = document.querySelector('#sampleSetting .h');
+            const view = document.getElementById('viewer');
+            view.style.backgroundSize = `${w.value}% ${h.value}%`;
+            const x = document.querySelector('#sampleSetting .x');
+            const y = document.querySelector('#sampleSetting .y');
+            view.style.backgroundPosition = `${x.value}px ${y.value}px`;
+        };
+    });
+
+document.querySelector('#sampleSetting .opacity').oninput = (e) => {
+    document.querySelectorAll('#viewer canvas').forEach((c) => {
+        c.style.opacity = e.target.value / 100;
+    });
 };
 
 function color2hsv(color, paletteId) {

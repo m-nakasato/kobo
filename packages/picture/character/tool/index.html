@@ -75,7 +75,6 @@
                 width: fit-content;
                 padding: 0 1px 1px 0;
                 background-repeat: no-repeat;
-                background-size: 50% 50%;
             }
             .transparent {
                 background-color: #fff !important;
@@ -122,6 +121,19 @@
                 /* flex: 1; */
                 margin: 0 10px 10px 0;
             }
+            #sampleSetting {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            #sampleSetting span {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                border: 1px solid black;
+                padding: 5px;
+                min-height: 30px;
+            }
         </style>
     </head>
     <body>
@@ -153,9 +165,37 @@
             <div class="palette"><h3>Palette</h3></div>
         </div>
         <h2>Viewer</h2>
+        <div id="sampleSetting">
+            <span>
+                Sample:
+                <input type="file" id="sampleImg" accept="image/*" />
+            </span>
+            <span>
+                X:
+                <input type="number" value="0" min="-100" max="100" class="x" />
+                px
+            </span>
+            <span>
+                Y:
+                <input type="number" value="0" min="-100" max="100" class="y" />
+                px
+            </span>
+            <span>
+                W:
+                <input type="number" value="100" min="1" max="200" class="w" />
+                %
+            </span>
+            <span>
+                H:
+                <input type="number" value="100" min="1" max="200" class="h" />
+                %
+            </span>
+            <span>
+                Opacity:
+                <input type="range" value="100" min="0" max="100" class="opacity" />
+            </span>
+        </div>
         <div id="viewer" class="transparent"></div>
-        Sample:
-        <input type="file" id="sampleImg" accept="image/*" />
         <h2>Source</h2>
         <div id="source">
             <div class="palette">
