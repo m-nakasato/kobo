@@ -81,7 +81,7 @@ function setColorSliders(hsv) {
 function dispatchPaletteColorChange(hsv) {
     document
         .querySelector('#editor .palette')
-        .dispatchEvent(new CustomEvent('paletteColorChange', { detail: { hsv } }));
+        .dispatchEvent(new CustomEvent('paletteColorChange', { detail: { hsv: hsv.toUpperCase() } }));
 }
 
 colorSliders.forEach((colorSlider) => {
@@ -401,7 +401,8 @@ palette.addHook('afterChange', () => {
     renderViewer();
 });
 
-document.querySelector('#source .palette textarea').oninput = (e) => {
+document.querySelector('#source .palette textarea').onchange = (e) => {
+    e.target.value = e.target.value.toUpperCase();
     const paletteTbl = e.target.value.split(/\r\n|\n/).map((line) => {
         const cells = line.match(/.{3}/g);
         if (cells !== null) {
@@ -413,7 +414,7 @@ document.querySelector('#source .palette textarea').oninput = (e) => {
 };
 document
     .querySelector('#source .palette textarea')
-    .dispatchEvent(new Event('input', { bubbles: true }));
+    .dispatchEvent(new Event('change', { bubbles: true }));
 
 document.querySelector('#source .chr textarea').oninput = () => {
     initView(4, 2); // TODO: BMPの行数と列数を取得して反映する
